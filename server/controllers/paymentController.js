@@ -2,9 +2,12 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const supabase = require('../config/supabase');
 
+const razorpayKeyId = process.env.RAZORPAY_KEY_ID || 'placeholder_key_id';
+const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret';
+
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
+  key_id: razorpayKeyId,
+  key_secret: razorpayKeySecret
 });
 
 // @desc    Create Razorpay order
