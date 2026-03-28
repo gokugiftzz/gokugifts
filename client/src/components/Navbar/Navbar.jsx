@@ -58,9 +58,6 @@ const Navbar = () => {
           <Link to="/products?occasion=birthday" className={styles.navLink}>Birthday</Link>
           <Link to="/products?occasion=anniversary" className={styles.navLink}>Anniversary</Link>
           <Link to="/products?customizable=true" className={styles.navLink}>Customize</Link>
-          <Link to="/ai-finder" className={`${styles.navLink} ${styles.aiLink}`}>
-            <MdAutoAwesome /> AI Finder
-          </Link>
         </div>
 
         {/* Actions */}
@@ -147,7 +144,6 @@ const Navbar = () => {
           <Link to="/products?occasion=birthday" className={styles.mobileLink}>Birthday Gifts</Link>
           <Link to="/products?occasion=anniversary" className={styles.mobileLink}>Anniversary Gifts</Link>
           <Link to="/products?customizable=true" className={styles.mobileLink}>Customize</Link>
-          <Link to="/ai-finder" className={styles.mobileLink}>🤖 AI Gift Finder</Link>
           {user ? (
             <>
               <Link to="/profile" className={styles.mobileLink}>My Profile</Link>

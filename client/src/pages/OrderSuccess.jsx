@@ -39,7 +39,6 @@ const OrderSuccess = () => {
           
           <div className={styles.footerLinks}>
             <Link to="/products">New arrivals</Link>
-            <Link to="/ai-finder">Gift helper</Link>
             <Link to="/">Support</Link>
           </div>
         </div>

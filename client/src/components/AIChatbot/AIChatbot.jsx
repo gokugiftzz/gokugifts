@@ -36,7 +36,7 @@ const AIChatbot = () => {
       const res = await getAIChat({ message: input, history: messages });
       setMessages(prev => [...prev, { role: 'assistant', text: res.data.message }]);
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'assistant', text: "I'm having a bit of trouble connecting right now. 🎁 Try checking out our AI Gift Finder for more structured help!" }]);
+      setMessages(prev => [...prev, { role: 'assistant', text: "I'm having a bit of trouble connecting right now. 🎁 Please try again later!" }]);
     } finally {
       setLoading(false);
     }

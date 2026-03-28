@@ -35,8 +35,7 @@ const Footer = () => {
             <Link to="/products?occasion=birthday" className={styles.link}>Birthday Gifts</Link>
             <Link to="/products?occasion=anniversary" className={styles.link}>Anniversary Gifts</Link>
             <Link to="/products?occasion=wedding" className={styles.link}>Wedding Gifts</Link>
-            <Link to="/products?customizable=true" className={styles.link}>Customize Gift</Link>
-            <Link to="/ai-finder" className={styles.link}>AI Gift Finder</Link>
+           
           </div>
 
           {/* Support */}
@@ -53,9 +52,9 @@ const Footer = () => {
           {/* Contact */}
           <div className={styles.links}>
             <h4 className={styles.heading}>Contact Us</h4>
-            <a href="mailto:hello@gokugiftz.com" className={styles.contact}><FiMail /> hello@gokugiftz.com</a>
+            <a href="mailto:gokugiftzz@gmail.com" className={styles.contact}><FiMail /> gokugiftzz@gmail.com</a>
             <a href="tel:+918248526060" className={styles.contact}><FiPhone /> +91 824 852 6060</a>
-            <span className={styles.contact}><FiMapPin /> madurai,nattham,tamil nadu </span>
+            <span className={styles.contact}><FiMapPin /> Madurai, Natham, Tamil Nadu</span>
             <div className={styles.hours}>
               <span>Mon - Sat: 9AM - 8PM</span>
               <span>Sunday: 10AM - 6PM</span>

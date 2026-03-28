@@ -15,21 +15,12 @@ const HERO_SLIDES = [
     cta: 'Explore Gifts',
     ctaLink: '/products',
     gradient: 'linear-gradient(135deg, #ff6b6b22, #c77dff22)'
-  },
-  {
-    headline: 'AI-Powered',
-    highlight: 'Gift Finder.',
-    sub: 'Let our AI find the perfect gift for anyone, any occasion.',
-    cta: 'Try AI Finder',
-    ctaLink: '/ai-finder',
-    gradient: 'linear-gradient(135deg, #c77dff22, #06d6a022)'
   }
 ];
 
 const FEATURES = [
   { icon: FiGift, title: 'Personalized', desc: 'Add names, photos, and messages to any gift' },
   { icon: FiZap, title: 'Same Day Delivery', desc: 'Get gifts delivered within hours in select cities' },
-  { icon: MdAutoAwesome, title: 'AI Gift Finder', desc: 'Let AI find the perfect gift in seconds' },
   { icon: FiShield, title: 'Quality Assured', desc: '100% satisfaction guarantee on all products' }
 ];
 
@@ -46,7 +37,6 @@ const CATEGORIES_DATA = [
 
 const TESTIMONIALS = [
   { name: 'Priya Sharma', rating: 5, text: 'Ordered a custom photo mug for my mom. The quality was incredible and it arrived in beautiful packaging! She absolutely loved it.', avatar: '🙋‍♀️', city: 'Mumbai' },
-  { name: 'Rahul Mehra', rating: 5, text: 'The AI gift finder is a game changer! Found the perfect anniversary gift for my wife in under 2 minutes. Highly recommend!', avatar: '👨', city: 'Delhi' },
   { name: 'Ananya Singh', rating: 5, text: 'Same day delivery is REAL! Ordered at 11am and got the birthday hamper by 5pm. My friend was so surprised!', avatar: '🙋‍♀️', city: 'Bangalore' }
 ];
 
@@ -89,9 +79,6 @@ const Home = () => {
           <div className={styles.heroCtas}>
             <Link to={slide.ctaLink} className={`${styles.heroCta} btn btn-primary`}>
               {slide.cta} <FiArrowRight />
-            </Link>
-            <Link to="/ai-finder" className={`${styles.heroCtaSecondary} btn btn-secondary`}>
-              <MdAutoAwesome /> Try AI Finder
             </Link>
           </div>
           {/* Stats */}
@@ -162,33 +149,6 @@ const Home = () => {
             <Link to="/products" className="btn btn-secondary">
               View All Products <FiArrowRight />
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* AI Gift Finder Banner */}
-      <section className={styles.aiBanner}>
-        <div className={styles.container}>
-          <div className={styles.aiBannerInner}>
-            <div className={styles.aiLeft}>
-              <div className={styles.aiBadge}><MdAutoAwesome /> AI Powered</div>
-              <h2 className={styles.aiTitle}>Can't decide what to gift?</h2>
-              <p className={styles.aiDesc}>
-                Tell our AI about the recipient and occasion. Get personalized suggestions in seconds!
-              </p>
-              <Link to="/ai-finder" className="btn btn-primary">
-                Launch AI Gift Finder <FiArrowRight />
-              </Link>
-            </div>
-            <div className={styles.aiRight}>
-              <div className={styles.aiCard}>
-                <div className={styles.aiQuestion}>Who is the gift for?</div>
-                {['Mom 👩', 'Best Friend 🤝', 'Partner 💑'].map(opt => (
-                  <div key={opt} className={styles.aiOption}>{opt}</div>
-                ))}
-                <div className={`${styles.aiOption} ${styles.aiOptionActive}`}>Partner 💑</div>
-              </div>
-            </div>
           </div>
         </div>
       </section>

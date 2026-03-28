@@ -16,7 +16,6 @@ const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Wishlist = lazy(() => import('./pages/Wishlist'));
-const AIGiftFinder = lazy(() => import('./pages/AIGiftFinder'));
 const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -52,7 +51,6 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/ai-finder" element={<AIGiftFinder />} />
             <Route path="/order-success" element={<OrderSuccess />} />
             
             {/* Support Routes */}
