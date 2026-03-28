@@ -55,7 +55,7 @@ const Footer = () => {
             <h4 className={styles.heading}>Contact Us</h4>
             <a href="mailto:hello@gokugiftz.com" className={styles.contact}><FiMail /> hello@gokugiftz.com</a>
             <a href="tel:+918248526060" className={styles.contact}><FiPhone /> +91 824 852 6060</a>
-            <span className={styles.contact}><FiMapPin /> Mumbai, India 400001</span>
+            <span className={styles.contact}><FiMapPin /> madurai,nattham,tamil nadu </span>
             <div className={styles.hours}>
               <span>Mon - Sat: 9AM - 8PM</span>
               <span>Sunday: 10AM - 6PM</span>
