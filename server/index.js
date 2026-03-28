@@ -55,6 +55,11 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5005;
-app.listen(PORT, () => {
-  console.log(`🚀 GokuGiftz Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 GokuGiftz Server running on port ${PORT}`);
+  });
+}
+
+// Required for Vercel Serverless deployment
+module.exports = app;
