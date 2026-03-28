@@ -1,0 +1,33 @@
+.container { padding: 20px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.header h1 { font-size: 1.5rem; color: #111827; }
+.subtitle { color: #6b7280; font-size: 0.9rem; }
+.filters select { padding: 8px 12px; border-radius: 8px; border: 1px solid #d1d5db; outline: none; background-color: white; }
+
+.tableCard { background: #fff; border: 1px solid #eee; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+.table { width: 100%; border-collapse: collapse; text-align: left; }
+.table th { background: #f9fafb; padding: 16px; border-bottom: 2px solid #f3f4f6; font-size: 0.85rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; }
+.table td { padding: 16px; border-bottom: 1px solid #f3f4f6; font-size: 0.9rem; color: #4b5563; }
+
+.customerCell { display: flex; flex-direction: column; }
+.customerCell small { color: #9ca3af; font-size: 0.75rem; }
+
+.statusBadge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: capitalize; }
+.pending { background: #fff7ed; color: #f97316; }
+.confirmed { background: #ecfdf5; color: #10b981; }
+.processing { background: #eff6ff; color: #3b82f6; }
+.shipped { background: #f5f3ff; color: #8b5cf6; }
+.delivered { background: #ecfdf5; color: #047857; }
+.cancelled { background: #fef2f2; color: #ef4444; }
+
+.statusIconPending { color: #f97316; }
+.statusIconConfirmed { color: #10b981; }
+.statusIconProcessing { color: #3b82f6; }
+.statusIconShipped { color: #8b5cf6; }
+.statusIconDelivered { color: #047857; }
+.statusIconCancelled { color: #ef4444; }
+
+.statusUpdate { padding: 6px 10px; border-radius: 6px; border: 1px solid #e5e7eb; outline: none; font-size: 0.8rem; cursor: pointer; }
+.statusUpdate:hover { border-color: #3b82f6; }
+
+.loading, .empty { padding: 60px; text-align: center; color: #9ca3af; font-weight: 500; font-size: 1.1rem; }

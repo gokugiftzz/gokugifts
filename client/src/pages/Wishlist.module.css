@@ -1,0 +1,76 @@
+.page {
+  padding-top: 100px;
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.header {
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  font-family: 'Playfair Display', serif;
+}
+
+.header h1 span {
+  font-size: 1rem;
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.header p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.wishWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wishActions {
+  display: flex;
+  gap: 12px;
+}
+
+.addBtn {
+  flex: 1;
+  padding: 12px !important;
+  font-size: 0.9rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.removeBtn {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  color: var(--primary);
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.removeBtn:hover {
+  background: var(--primary);
+  color: #fff;
+}

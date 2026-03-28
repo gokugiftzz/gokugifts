@@ -1,0 +1,186 @@
+const supabase = require('../config/supabase');
+const cloudinary = require('../config/cloudinary');
+
+// @desc    Get all products
+// @route   GET /api/products
+exports.getProducts = async (req, res) => {
+  try {
+    const { category, occasion, relationship, minPrice, maxPrice, search, sort, page = 1, limit = 12 } = req.query;
+    let query = supabase.from('products').select('*', { count: 'exact' });
+
+    if (category) query = query.eq('category', category);
+    if (occasion) query = query.eq('occasion', occasion);
+    if (relationship) query = query.contains('relationship_tags', [relationship]);
+    if (minPrice) query = query.gte('price', parseFloat(minPrice));
+    if (maxPrice) query = query.lte('price', parseFloat(maxPrice));
+    if (search) query = query.ilike('name', `%${search}%`);
+
+    if (sort === 'price_asc') query = query.order('price', { ascending: true });
+    else if (sort === 'price_desc') query = query.order('price', { ascending: false });
+    else if (sort === 'rating') query = query.order('rating', { ascending: false });
+    else query = query.order('created_at', { ascending: false });
+
+    const from = (page - 1) * limit;
+    query = query.range(from, from + parseInt(limit) - 1);
+
+    const { data: products, error, count } = await query;
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      products,
+      total: count,
+      page: parseInt(page),
+      pages: Math.ceil(count / limit)
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Get single product
+// @route   GET /api/products/:id
+exports.getProduct = async (req, res) => {
+  try {
+    const { data: product, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
+    if (error || !product) return res.status(404).json({ success: false, message: 'Product not found' });
+    res.json({ success: true, product });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Create product (admin)
+// @route   POST /api/products
+exports.createProduct = async (req, res) => {
+  try {
+    const {
+      name, description, price, originalPrice, category, occasion, relationship_tags,
+      customizable, stock, features, same_day_delivery
+    } = req.body;
+
+    let imageUrls = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
+
+    // 1️⃣ Handle Image Upload to Supabase Storage if file exists
+    if (req.file) {
+      const fileName = `products/${Date.now()}-${req.file.originalname.replace(/\s+/g, '_')}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error('Supabase Upload Error:', uploadError);
+        throw new Error('Image upload failed: ' + uploadError.message);
+      }
+
+      // 2️⃣ Get Public URL
+      const { data: urlData } = supabase.storage
+        .from('products')
+        .getPublicUrl(fileName);
+
+      if (urlData?.publicUrl) {
+        imageUrls = [urlData.publicUrl];
+      }
+    }
+
+    // 3️⃣ Save to Database
+    const { data: product, error } = await supabase
+      .from('products')
+      .insert([{
+        name, 
+        description, 
+        price: parseFloat(price), 
+        original_price: originalPrice ? parseFloat(originalPrice) : null, 
+        category, 
+        occasion,
+        relationship_tags: relationship_tags ? (Array.isArray(relationship_tags) ? relationship_tags : [relationship_tags]) : [], 
+        customizable: customizable === 'true' || customizable === true, 
+        stock: parseInt(stock) || 0, 
+        images: imageUrls, 
+        features: features ? (Array.isArray(features) ? features : [features]) : [],
+        same_day_delivery: same_day_delivery === 'true' || same_day_delivery === true, 
+        created_by: req.user.id
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database Error:', error);
+      throw error;
+    }
+
+    res.status(201).json({ success: true, product });
+  } catch (err) {
+    console.error('Create Product Error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Update product (admin)
+// @route   PUT /api/products/:id
+exports.updateProduct = async (req, res) => {
+  try {
+    const { data: product, error } = await supabase
+      .from('products')
+      .update(req.body)
+      .eq('id', req.params.id)
+      .select()
+      .single();
+    if (error) throw error;
+    res.json({ success: true, product });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Delete product (admin)
+// @route   DELETE /api/products/:id
+exports.deleteProduct = async (req, res) => {
+  try {
+    const { error } = await supabase.from('products').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ success: true, message: 'Product deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Get featured products
+// @route   GET /api/products/featured
+exports.getFeatured = async (req, res) => {
+  try {
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('featured', true)
+      .limit(8);
+    if (error) throw error;
+    res.json({ success: true, products });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Get categories
+// @route   GET /api/products/categories
+exports.getCategories = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('category')
+      .order('category');
+    if (error) throw error;
+    const categories = [...new Set(data.map(p => p.category))];
+    res.json({ success: true, categories });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

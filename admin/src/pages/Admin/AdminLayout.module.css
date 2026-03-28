@@ -1,0 +1,153 @@
+.adminPage {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  background: #f8f9fa;
+  color: #333;
+}
+
+@media (max-width: 900px) {
+  .adminPage {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sidebar {
+  background: #111;
+  color: #fff;
+  padding: 30px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+.sidebarHeader {
+  padding: 0 30px;
+  margin-bottom: 50px;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: #ff6b6b;
+}
+
+.logo span {
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: block;
+  opacity: 0.5;
+  color: #fff;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+  margin-top: 20px;
+  transition: color 0.2s;
+}
+
+.backBtn:hover {
+  color: #fff;
+}
+
+.nav {
+  flex: 1;
+}
+
+.link, .active {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 30px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-left: 4px solid transparent;
+  transition: all 0.2s;
+}
+
+.link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.active {
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff6b6b;
+  border-left-color: #ff6b6b;
+}
+
+.sidebarFooter {
+  padding: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.85rem;
+}
+
+.sidebarFooter p {
+  opacity: 0.4;
+  margin-bottom: 4px;
+}
+
+.sidebarFooter strong {
+  display: block;
+}
+
+.main {
+  background: #f1f3f5;
+  overflow-y: auto;
+}
+
+.topHeader {
+  background: #fff;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #dee2e6;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+
+.topHeader h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #212529;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.date {
+  font-size: 0.85rem;
+  color: #adb5bd;
+}
+
+.adminAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #ff6b6b;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.content {
+  padding: 40px;
+}

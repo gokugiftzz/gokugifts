@@ -1,0 +1,20 @@
+<svg width="200" height="120" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- GOKU Text -->
+  <text x="50" y="45" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="black">GOKU</text>
+  
+  <!-- GIFTZ. Text -->
+  <text x="48" y="85" font-family="Arial, sans-serif" font-weight="900" font-size="45" fill="black">GIFTZ<tspan fill="#e63946">.</tspan></text>
+  
+  <!-- Underline -->
+  <rect x="70" y="100" width="80" height="4" fill="black" />
+  
+  <!-- Santa Hat on Z -->
+  <g transform="translate(150, 20) rotate(15)">
+    <!-- Red Hat Body -->
+    <path d="M5 40 Q25 0 45 40 L5 40 Z" fill="#e63946" />
+    <!-- White Trim -->
+    <rect x="3" y="38" width="44" height="8" rx="4" fill="white" />
+    <!-- White Pom Pom -->
+    <circle cx="25" cy="5" r="8" fill="white" />
+  </g>
+</svg>
