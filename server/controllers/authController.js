@@ -43,11 +43,13 @@ exports.login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password required' });
     }
-    const { data: user, error } = await supabase
+    const { data: users, error } = await supabase
       .from('users')
       .select('*')
       .eq('email', email.trim().toLowerCase())
-      .maybeSingle();
+      .limit(1);
+    
+    const user = users && users.length > 0 ? users[0] : null;
     if (error || !user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
