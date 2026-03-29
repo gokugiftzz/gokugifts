@@ -19,6 +19,7 @@ const ProductDetail = () => {
   const [customText, setCustomText] = useState('');
   const [customImage, setCustomImage] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const fileRef = useRef();
   const { addToCart } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
@@ -28,11 +29,17 @@ const ProductDetail = () => {
       setLoading(true);
       try {
         const res = await getProduct(id);
-        setProduct(res.data.product);
+        const fetchedProduct = res.data.product;
+        setProduct(fetchedProduct);
+        
+        // Auto-select first variant if available
+        if (fetchedProduct.product_variants && fetchedProduct.product_variants.length > 0) {
+          setSelectedVariant(fetchedProduct.product_variants[0]);
+        }
+        
         const rev = await getReviews(id);
         setReviews(rev.data.reviews || []);
       } catch {
-        // Stop silently ignoring errors and let product remain null
         setProduct(null);
         setReviews([]);
       } finally { setLoading(false); }
@@ -50,8 +57,22 @@ const ProductDetail = () => {
     const customization = product?.customizable && (customText || customImage)
       ? { text: customText, image: customImage }
       : null;
-    for (let i = 0; i < quantity; i++) addToCart(product, 1, customization);
-    toast.success(`Added ${quantity}x ${product.name} to cart!`);
+    
+    // Create a product object that includes variant info if selected
+    const productToAdd = selectedVariant 
+      ? { 
+          ...product, 
+          price: selectedVariant.discounted_price || selectedVariant.price,
+          original_price: selectedVariant.price,
+          variantId: selectedVariant.id,
+          variantName: selectedVariant.variant_name,
+          sku: selectedVariant.sku,
+          image: selectedVariant.image || product.images?.[0]
+        }
+      : product;
+
+    for (let i = 0; i < quantity; i++) addToCart(productToAdd, 1, customization);
+    toast.success(`Added ${quantity}x ${product.name}${selectedVariant ? ` (${selectedVariant.variant_name})` : ''} to cart!`);
   };
 
   if (loading) return (
@@ -129,12 +150,45 @@ const ProductDetail = () => {
 
             {/* Price */}
             <div className={styles.priceSection}>
-              <span className={styles.price}>₹{product.price?.toLocaleString()}</span>
-              {product.original_price && (
-                <span className={styles.originalPrice}>₹{product.original_price?.toLocaleString()}</span>
+              <span className={styles.price}>
+                ₹{(selectedVariant ? (selectedVariant.discounted_price || selectedVariant.price) : product.price)?.toLocaleString()}
+              </span>
+              {(selectedVariant ? selectedVariant.price > (selectedVariant.discounted_price || selectedVariant.price) : product.original_price) && (
+                <span className={styles.originalPrice}>
+                  ₹{(selectedVariant ? selectedVariant.price : product.original_price)?.toLocaleString()}
+                </span>
               )}
-              {discount > 0 && <span className={styles.discountPct}>{discount}% OFF</span>}
+              {(selectedVariant ? selectedVariant.discount_percentage > 0 : discount > 0) && (
+                <span className={styles.discountPct}>
+                  {selectedVariant ? Math.round(selectedVariant.discount_percentage) : discount}% OFF
+                </span>
+              )}
             </div>
+
+            {/* Variants Selection */}
+            {product.product_variants && product.product_variants.length > 0 && (
+              <div className={styles.variantSection}>
+                <h3 className={styles.variantTitle}>Choose Variant</h3>
+                <div className={styles.variantList}>
+                  {product.product_variants.map(variant => (
+                    <button
+                      key={variant.id}
+                      className={`${styles.variantBtn} ${selectedVariant?.id === variant.id ? styles.variantActive : ''}`}
+                      onClick={() => {
+                        setSelectedVariant(variant);
+                        if (variant.image) {
+                          // Try to find if this variant image is in product images to sync preview
+                          const imgIndex = product.images.indexOf(variant.image);
+                          if (imgIndex !== -1) setSelectedImage(imgIndex);
+                        }
+                      }}
+                    >
+                      {variant.variant_name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Features */}
             {product.features && (
@@ -221,10 +275,10 @@ const ProductDetail = () => {
             <div className={styles.quantitySection}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className={styles.qtyLabel}>Quantity</span>
-                {product.stock <= 5 && product.stock > 0 && (
-                  <span style={{ color: '#ff6b6b', fontSize: '0.8rem', fontWeight: 600 }}>🔥 Only {product.stock} left!</span>
+                {(selectedVariant ? selectedVariant.stock : product.stock) <= 5 && (selectedVariant ? selectedVariant.stock : product.stock) > 0 && (
+                  <span style={{ color: '#ff6b6b', fontSize: '0.8rem', fontWeight: 600 }}>🔥 Only {(selectedVariant ? selectedVariant.stock : product.stock)} left!</span>
                 )}
-                {product.stock <= 0 && (
+                {(selectedVariant ? selectedVariant.stock : product.stock) <= 0 && (
                   <span style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 600 }}>🚫 Out of Stock</span>
                 )}
               </div>
@@ -232,15 +286,15 @@ const ProductDetail = () => {
                 <button 
                   className={styles.qtyBtn} 
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  disabled={product.stock <= 0}
+                  disabled={(selectedVariant ? selectedVariant.stock : product.stock) <= 0}
                 >
                   <FiMinus />
                 </button>
-                <span className={styles.qtyValue}>{product.stock <= 0 ? 0 : quantity}</span>
+                <span className={styles.qtyValue}>{(selectedVariant ? selectedVariant.stock : product.stock) <= 0 ? 0 : quantity}</span>
                 <button 
                   className={styles.qtyBtn} 
-                  onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
-                  disabled={quantity >= product.stock || product.stock <= 0}
+                  onClick={() => setQuantity(q => Math.min((selectedVariant ? selectedVariant.stock : product.stock), q + 1))}
+                  disabled={quantity >= (selectedVariant ? selectedVariant.stock : product.stock) || (selectedVariant ? selectedVariant.stock : product.stock) <= 0}
                 >
                   <FiPlus />
                 </button>

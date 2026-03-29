@@ -21,7 +21,8 @@ const AdminProducts = () => {
     same_day_delivery: false,
     customizable: false,
     imageURL: '', // fallback
-    imageFile: null
+    imageFile: null,
+    variants: [] // Array of { variantName, price, discountPercentage, stock, image }
   });
 
   const [preview, setPreview] = useState(null);
@@ -102,10 +103,15 @@ const AdminProducts = () => {
         formData.append('images', 'https://via.placeholder.com/400x400?text=🎁'); // Default image if neither file nor URL
       }
 
+      // Add Variants
+      if (newProduct.variants.length > 0) {
+        formData.append('variants', JSON.stringify(newProduct.variants));
+      }
+
       await createProduct(formData);
-      toast.success('Product created with image successfully!');
+      toast.success('Product created with variants successfully!');
       setShowModal(false);
-      setNewProduct({ name: '', description: '', price: '', originalPrice: '', category: 'Gifts', stock: 10, same_day_delivery: false, customizable: false, imageURL: '', imageFile: null });
+      setNewProduct({ name: '', description: '', price: '', originalPrice: '', category: 'Gifts', stock: 10, same_day_delivery: false, customizable: false, imageURL: '', imageFile: null, variants: [] });
       setPreview(null);
       fetchProducts();
     } catch (err) {
@@ -113,6 +119,26 @@ const AdminProducts = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAddVariant = () => {
+    setNewProduct({
+      ...newProduct,
+      variants: [...newProduct.variants, { variantName: '', price: '', discountPercentage: 0, stock: 10 }]
+    });
+  };
+
+  const handleUpdateVariant = (index, field, value) => {
+    const updatedVariants = [...newProduct.variants];
+    updatedVariants[index][field] = value;
+    setNewProduct({ ...newProduct, variants: updatedVariants });
+  };
+
+  const handleRemoveVariant = (index) => {
+    setNewProduct({
+      ...newProduct,
+      variants: newProduct.variants.filter((_, i) => i !== index)
+    });
   };
 
   return (
@@ -248,6 +274,63 @@ const AdminProducts = () => {
                   <input type="checkbox" checked={newProduct.customizable} onChange={e => setNewProduct({...newProduct, customizable: e.target.checked})} />
                   Customizable (Text/Photo)
                 </label>
+              </div>
+
+              {/* Variants Section */}
+              <div className={styles.variantsSection}>
+                <div className={styles.variantsHeader}>
+                  <h3>Product Variants</h3>
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={handleAddVariant}>
+                    <FiPlus /> Add Variant
+                  </button>
+                </div>
+                
+                {newProduct.variants.length > 0 ? (
+                  <div className={styles.variantsList}>
+                    {newProduct.variants.map((variant, index) => (
+                      <div key={index} className={styles.variantItem}>
+                        <div className={styles.variantInputs}>
+                          <input 
+                            type="text" 
+                            className="input-sm" 
+                            placeholder="Variant Name (e.g. Red / XL)" 
+                            value={variant.variantName} 
+                            onChange={e => handleUpdateVariant(index, 'variantName', e.target.value)}
+                            required
+                          />
+                          <input 
+                            type="number" 
+                            className="input-sm" 
+                            placeholder="Price" 
+                            value={variant.price} 
+                            onChange={e => handleUpdateVariant(index, 'price', e.target.value)}
+                            required
+                          />
+                          <input 
+                            type="number" 
+                            className="input-sm" 
+                            placeholder="DSQ %" 
+                            value={variant.discountPercentage} 
+                            onChange={e => handleUpdateVariant(index, 'discountPercentage', e.target.value)}
+                          />
+                          <input 
+                            type="number" 
+                            className="input-sm" 
+                            placeholder="Stock" 
+                            value={variant.stock} 
+                            onChange={e => handleUpdateVariant(index, 'stock', e.target.value)}
+                            required
+                          />
+                        </div>
+                        <button type="button" className={styles.removeVariantBtn} onClick={() => handleRemoveVariant(index)}>
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.noVariants}>No variants added yet. (Optional)</p>
+                )}
               </div>
 
               <div className={styles.modalFooter}>

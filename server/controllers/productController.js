@@ -42,13 +42,26 @@ exports.getProducts = async (req, res) => {
 // @route   GET /api/products/:id
 exports.getProduct = async (req, res) => {
   try {
-    const { data: product, error } = await supabase
+    // Try to fetch with variants (requires product_variants table to exist)
+    let { data: product, error } = await supabase
       .from('products')
-      .select('*')
+      .select('*, product_variants(*)')
       .eq('id', req.params.id)
       .single();
+
+    // PGRST200 = relationship/table not found — fall back to plain product fetch
+    if (error && error.code === 'PGRST200') {
+      const fallback = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', req.params.id)
+        .single();
+      product = fallback.data;
+      error = fallback.error;
+    }
+
     if (error || !product) return res.status(404).json({ success: false, message: 'Product not found' });
-    res.json({ success: true, product });
+    res.json({ success: true, product: { ...product, product_variants: product.product_variants || [] } });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -67,7 +80,7 @@ exports.createProduct = async (req, res) => {
 
     // 1️⃣ Handle Image Upload to Supabase Storage if file exists
     if (req.file) {
-      const fileName = `products/${Date.now()}-${req.file.originalname.replace(/\s+/g, '_')}`;
+      const fileName = `gallery/${Date.now()}-${req.file.originalname.replace(/\s+/g, '_')}`;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('products')
@@ -91,7 +104,7 @@ exports.createProduct = async (req, res) => {
       }
     }
 
-    // 3️⃣ Save to Database
+    // 3️⃣ Save Product to Database
     const { data: product, error } = await supabase
       .from('products')
       .insert([{
@@ -117,7 +130,33 @@ exports.createProduct = async (req, res) => {
       throw error;
     }
 
-    res.status(201).json({ success: true, product });
+    // 4️⃣ Handle Variants if provided
+    let variantsData = [];
+    if (req.body.variants) {
+      const parsedVariants = typeof req.body.variants === 'string' ? JSON.parse(req.body.variants) : req.body.variants;
+      
+      if (Array.isArray(parsedVariants) && parsedVariants.length > 0) {
+        const insertVariants = parsedVariants.map((v, index) => ({
+          product_id: product.id,
+          variant_name: v.variantName,
+          sku: v.sku || `SKU-${product.id.substring(0, 5)}-${index + 1}`,
+          price: parseFloat(v.price),
+          discount_percentage: parseFloat(v.discountPercentage || 0),
+          stock: parseInt(v.stock) || 0,
+          image: v.image || null
+        }));
+
+        const { data: createdVariants, error: variantError } = await supabase
+          .from('product_variants')
+          .insert(insertVariants)
+          .select();
+
+        if (variantError) console.error('Variant Insert Error:', variantError);
+        else variantsData = createdVariants;
+      }
+    }
+
+    res.status(201).json({ success: true, product: { ...product, product_variants: variantsData } });
   } catch (err) {
     console.error('Create Product Error:', err);
     res.status(500).json({ success: false, message: err.message });

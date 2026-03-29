@@ -35,10 +35,7 @@ const CATEGORIES_DATA = [
   { name: 'Edibles', image: 'https://images.unsplash.com/photo-1511381939415-e4401546383d?auto=format&fit=crop&w=500&q=80', color: '#ff9ff3', link: '/products?category=Edibles' }
 ];
 
-const TESTIMONIALS = [
-  { name: 'Priya Sharma', rating: 5, text: 'Ordered a custom photo mug for my mom. The quality was incredible and it arrived in beautiful packaging! She absolutely loved it.', avatar: '🙋‍♀️', city: 'Mumbai' },
-  { name: 'Ananya Singh', rating: 5, text: 'Same day delivery is REAL! Ordered at 11am and got the birthday hamper by 5pm. My friend was so surprised!', avatar: '🙋‍♀️', city: 'Bangalore' }
-];
+const TESTIMONIALS = [];
 
 const Home = () => {
   const [products, setProducts] = useState([]);

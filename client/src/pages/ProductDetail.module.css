@@ -60,6 +60,15 @@
   background: #fdf2f8; border: 1px solid #fce7f3;
   border-radius: 20px; padding: 24px; margin-bottom: 24px;
 }
+
+/* Variant Styles */
+.variantSection { margin-bottom: 32px; }
+.variantTitle { font-size: 0.9rem; font-weight: 800; color: #111827; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.variantList { display: flex; flex-wrap: wrap; gap: 10px; }
+.variantBtn { padding: 10px 20px; border-radius: 40px; border: 2px solid #eee; background: #fff; color: #4b5563; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.variantBtn:hover { border-color: #d1d5db; background: #f9fafb; }
+.variantActive { border-color: var(--primary) !important; background: #fff5f5 !important; color: var(--primary) !important; box-shadow: 0 4px 12px rgba(230, 57, 70, 0.1); }
+
 .customTitle { font-size: 1rem; font-weight: 800; color: var(--purple); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
 .customPreview { margin-bottom: 20px; border-radius: 16px; overflow: hidden; border: 1px solid #eee; }
 .previewCanvas {

@@ -40,18 +40,21 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('[LOGIN DEBUG] email:', JSON.stringify(email), '| password length:', password?.length);
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password required' });
     }
     const { data: user, error } = await supabase
       .from('users')
       .select('*')
-      .eq('email', email)
+      .eq('email', email.trim().toLowerCase())
       .single();
+    console.log('[LOGIN DEBUG] user found:', !!user, '| db error:', error?.message);
     if (error || !user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('[LOGIN DEBUG] password match:', isMatch);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }

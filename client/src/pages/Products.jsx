@@ -66,39 +66,42 @@ const Products = () => {
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <div className={styles.container}>
-          <div className={styles.headerContent}>
-            <div>
+      <div className={styles.topSection}>
+        <div className="container">
+          <div className={styles.header}>
+            <div className={styles.headerLeft}>
               <h1 className={styles.title}>
                 {filters.occasion ? `${filters.occasion.charAt(0).toUpperCase() + filters.occasion.slice(1)} Gifts` :
                  filters.category ? filters.category :
                  filters.search ? `Results for "${filters.search}"` : 'All Gifts'}
               </h1>
-              <p className={styles.subtitle}>{total} products found</p>
+              <p className={styles.subtitle}>{total} premium products found</p>
             </div>
             <div className={styles.controls}>
-              <button className={`${styles.filterToggle} btn btn-ghost`} onClick={() => setFiltersOpen(!filtersOpen)}>
+              <div className={styles.sortWrapper}>
+                <span className={styles.label}>Sort by:</span>
+                <select
+                  value={filters.sort}
+                  onChange={e => updateFilter('sort', e.target.value)}
+                  className={styles.sortSelect}
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                  <option value="rating">Best Rated</option>
+                </select>
+              </div>
+              <button className={`${styles.filterToggle} btn`} onClick={() => setFiltersOpen(!filtersOpen)}>
                 <FiSliders />
-                Filters
+                <span>Filters</span>
                 {activeFilterCount > 0 && <span className={styles.filterCount}>{activeFilterCount}</span>}
               </button>
-              <select
-                value={filters.sort}
-                onChange={e => updateFilter('sort', e.target.value)}
-                className={`input ${styles.sortSelect}`}
-              >
-                <option value="newest">Newest First</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="rating">Best Rated</option>
-              </select>
             </div>
           </div>
         </div>
       </div>
 
-      <div className={styles.container}>
+      <div className="container">
         <div className={styles.layout}>
           {/* Sidebar Filters */}
           <aside className={`${styles.sidebar} ${filtersOpen ? styles.sidebarOpen : ''}`}>
@@ -126,17 +129,20 @@ const Products = () => {
             {/* Price Range */}
             <div className={styles.filterGroup}>
               <h4 className={styles.filterLabel}>Price Range</h4>
-              {PRICE_RANGES.map(range => (
-                <label key={range.label} className={styles.checkLabel}>
-                  <input
-                    type="radio"
-                    name="price"
-                    checked={filters.minPrice == range.min && filters.maxPrice == range.max}
-                    onChange={() => updateFilter('minPrice', range.min) || updateFilter('maxPrice', range.max)}
-                  />
-                  <span>{range.label}</span>
-                </label>
-              ))}
+              <div className={styles.filterTags}>
+                {PRICE_RANGES.map(range => (
+                  <button
+                    key={range.label}
+                    className={`${styles.filterTag} ${filters.minPrice == range.min && filters.maxPrice == range.max ? styles.tagActive : ''}`}
+                    onClick={() => {
+                        updateFilter('minPrice', range.min);
+                        updateFilter('maxPrice', range.max);
+                    }}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Category */}
