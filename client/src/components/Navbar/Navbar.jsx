@@ -1,11 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FiShoppingCart, FiHeart, FiUser, FiSearch, FiMenu, FiX, FiBell } from 'react-icons/fi';
-import { MdAutoAwesome } from 'react-icons/md';
+import { FiShoppingCart, FiHeart, FiSearch, FiMenu, FiX, FiChevronDown, FiPackage } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { getProducts } from '../../utils/api';
 import styles from './Navbar.module.css';
+
+const NAV_CATEGORIES = [
+  { name: 'Personalized', param: { customizable: 'true' }, link: '/products?customizable=true' },
+  { name: 'Birthday',     param: { occasion: 'birthday' }, link: '/products?occasion=birthday' },
+  { name: 'Anniversary',  param: { occasion: 'anniversary' }, link: '/products?occasion=anniversary' },
+  { name: 'Jewelry',      param: { category: 'Jewelry' }, link: '/products?category=Jewelry' },
+  { name: 'Hampers',      param: { category: 'Hampers' }, link: '/products?category=Hampers' },
+  { name: 'Art',          param: { category: 'Art' }, link: '/products?category=Art' },
+];
+
+/* Individual category dropdown */
+const CategoryDropdown = ({ cat }) => {
+  const [products, setProducts] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+
+  const load = async () => {
+    if (loaded) return;
+    try {
+      const res = await getProducts({ ...cat.param, limit: 4 });
+      setProducts(res.data.products || []);
+    } catch {
+      setProducts([]);
+    } finally {
+      setLoaded(true);
+    }
+  };
+
+  return (
+    <div className={styles.catDropdown} onMouseEnter={load}>
+      <button className={styles.catBtn}>
+        {cat.name} <FiChevronDown className={styles.chevron} />
+      </button>
+      <div className={styles.catPanel}>
+        <div className={styles.catPanelHeader}>
+          <span className={styles.catPanelTitle}>{cat.name} Gifts</span>
+          <Link to={cat.link} className={styles.viewAll}>View All →</Link>
+        </div>
+        {!loaded ? (
+          <p className={styles.panelMsg}>Loading...</p>
+        ) : products.length === 0 ? (
+          <div className={styles.emptyPanel}>
+            <FiPackage size={28} />
+            <p>New arrivals coming soon!</p>
+            <Link to={cat.link} className={styles.browseCta}>Browse All Gifts</Link>
+          </div>
+        ) : (
+          <div className={styles.panelGrid}>
+            {products.map(p => (
+              <Link to={`/products/${p.id}`} key={p.id} className={styles.panelCard}>
+                <div
+                  className={styles.panelImg}
+                  style={{ backgroundImage: `url(${p.images?.[0] || ''})` }}
+                />
+                <div className={styles.panelInfo}>
+                  <span className={styles.panelName}>{p.name}</span>
+                  <span className={styles.panelPrice}>₹{p.price}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -13,6 +78,7 @@ const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileCatOpen, setMobileCatOpen] = useState(null);
   const { user, logout } = useAuth();
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
@@ -52,22 +118,21 @@ const Navbar = () => {
           <img src="/logo.png" alt="GokuGiftz" className={styles.logoImg} />
         </Link>
 
-        {/* Desktop Nav Links */}
+        {/* Desktop Nav — each category with its dropdown */}
         <div className={styles.navLinks}>
-          <Link to="/products" className={styles.navLink}>Shop</Link>
-          <Link to="/products?occasion=birthday" className={styles.navLink}>Birthday</Link>
-          <Link to="/products?occasion=anniversary" className={styles.navLink}>Anniversary</Link>
-          <Link to="/products?customizable=true" className={styles.navLink}>Customize</Link>
+          <Link to="/" className={styles.navLink}>Home</Link>
+          <Link to="/products" className={styles.navLink}>All</Link>
+          {NAV_CATEGORIES.map(cat => (
+            <CategoryDropdown key={cat.name} cat={cat} />
+          ))}
         </div>
 
         {/* Actions */}
         <div className={styles.actions}>
-          {/* Search */}
           <button className={styles.iconBtn} onClick={() => setSearchOpen(!searchOpen)} aria-label="Search">
             <FiSearch />
           </button>
 
-          {/* Wishlist */}
           {user && (
             <Link to="/wishlist" className={styles.iconBtn} aria-label="Wishlist">
               <FiHeart />
@@ -75,13 +140,11 @@ const Navbar = () => {
             </Link>
           )}
 
-          {/* Cart */}
           <Link to="/cart" className={styles.iconBtn} aria-label="Cart">
             <FiShoppingCart />
             {cartCount > 0 && <span className={styles.badge}>{cartCount}</span>}
           </Link>
 
-          {/* User */}
           {user ? (
             <div className={styles.userMenu}>
               <button className={styles.userBtn} onClick={() => setUserMenuOpen(!userMenuOpen)}>
@@ -109,7 +172,6 @@ const Navbar = () => {
             <Link to="/login" className={`${styles.loginBtn} btn btn-primary`}>Login</Link>
           )}
 
-          {/* Mobile Menu Toggle */}
           <button className={styles.menuBtn} onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
             {mobileOpen ? <FiX /> : <FiMenu />}
           </button>
@@ -140,12 +202,27 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className={styles.mobileMenu}>
-          <Link to="/products" className={styles.mobileLink}>Shop All</Link>
-          <Link to="/products?occasion=birthday" className={styles.mobileLink}>Birthday Gifts</Link>
-          <Link to="/products?occasion=anniversary" className={styles.mobileLink}>Anniversary Gifts</Link>
-          <Link to="/products?customizable=true" className={styles.mobileLink}>Customize</Link>
+          <Link to="/products" className={styles.mobileLink}>🛍️ All Products</Link>
+          <div className={styles.mobileDivider}>Categories</div>
+          {NAV_CATEGORIES.map(cat => (
+            <div key={cat.name}>
+              <button
+                className={styles.mobileCatBtn}
+                onClick={() => setMobileCatOpen(mobileCatOpen === cat.name ? null : cat.name)}
+              >
+                {cat.name}
+                <FiChevronDown className={mobileCatOpen === cat.name ? styles.chevronOpen : styles.chevron} />
+              </button>
+              {mobileCatOpen === cat.name && (
+                <Link to={cat.link} className={styles.mobileCatLink}>
+                  Browse all {cat.name} Gifts →
+                </Link>
+              )}
+            </div>
+          ))}
           {user ? (
             <>
+              <div className={styles.mobileDivider}>Account</div>
               <Link to="/profile" className={styles.mobileLink}>My Profile</Link>
               <Link to="/wishlist" className={styles.mobileLink}>Wishlist</Link>
               {user.role === 'admin' && <a href="http://localhost:5174/" className={styles.mobileLink}>Admin Panel</a>}
@@ -153,6 +230,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
+              <div className={styles.mobileDivider}>Account</div>
               <Link to="/login" className={styles.mobileLink}>Login</Link>
               <Link to="/register" className={styles.mobileLink}>Create Account</Link>
             </>

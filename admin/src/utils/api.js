@@ -44,7 +44,14 @@ export const createProduct = (data) => {
   }
   return API.post('/products', data);
 };
-export const updateProduct = (id, data) => API.put(`/products/${id}`, data);
+export const updateProduct = (id, data) => {
+  if (data instanceof FormData) {
+    return API.put(`/products/${id}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+  return API.put(`/products/${id}`, data);
+};
 export const deleteProduct = (id) => API.delete(`/products/${id}`);
 
 // Orders

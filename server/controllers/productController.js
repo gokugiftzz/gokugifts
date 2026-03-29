@@ -67,40 +67,36 @@ exports.getProduct = async (req, res) => {
   }
 };
 
+const uploadSupabaseFile = async (file) => {
+  const fileName = `gallery/${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.\-]/g, '_')}`;
+  const { error: uploadError } = await supabase.storage
+    .from('products')
+    .upload(fileName, file.buffer, {
+      contentType: file.mimetype,
+      upsert: true
+    });
+  if (uploadError) throw new Error('Image upload failed: ' + uploadError.message);
+  const { data: urlData } = supabase.storage.from('products').getPublicUrl(fileName);
+  return urlData?.publicUrl || null;
+};
+
 // @desc    Create product (admin)
 // @route   POST /api/products
 exports.createProduct = async (req, res) => {
   try {
     const {
       name, description, price, originalPrice, category, occasion, relationship_tags,
-      customizable, stock, features, same_day_delivery
+      customizable, stock, features
     } = req.body;
 
     let imageUrls = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
 
-    // 1️⃣ Handle Image Upload to Supabase Storage if file exists
-    if (req.file) {
-      const fileName = `gallery/${Date.now()}-${req.file.originalname.replace(/\s+/g, '_')}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('products')
-        .upload(fileName, req.file.buffer, {
-          contentType: req.file.mimetype,
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error('Supabase Upload Error:', uploadError);
-        throw new Error('Image upload failed: ' + uploadError.message);
-      }
-
-      // 2️⃣ Get Public URL
-      const { data: urlData } = supabase.storage
-        .from('products')
-        .getPublicUrl(fileName);
-
-      if (urlData?.publicUrl) {
-        imageUrls = [urlData.publicUrl];
+    // 1️⃣ Handle Multiple Main Product Images (fieldname: images)
+    if (req.files && req.files.length > 0) {
+      const mainImageFiles = req.files.filter(f => f.fieldname === 'images');
+      for (const file of mainImageFiles) {
+        const url = await uploadSupabaseFile(file);
+        if (url) imageUrls.push(url);
       }
     }
 
@@ -110,7 +106,7 @@ exports.createProduct = async (req, res) => {
       .insert([{
         name, 
         description, 
-        price: parseFloat(price), 
+        price: parseFloat(price) || 0, 
         original_price: originalPrice ? parseFloat(originalPrice) : null, 
         category, 
         occasion,
@@ -119,7 +115,6 @@ exports.createProduct = async (req, res) => {
         stock: parseInt(stock) || 0, 
         images: imageUrls, 
         features: features ? (Array.isArray(features) ? features : [features]) : [],
-        same_day_delivery: same_day_delivery === 'true' || same_day_delivery === true, 
         created_by: req.user.id
       }])
       .select()
@@ -136,15 +131,29 @@ exports.createProduct = async (req, res) => {
       const parsedVariants = typeof req.body.variants === 'string' ? JSON.parse(req.body.variants) : req.body.variants;
       
       if (Array.isArray(parsedVariants) && parsedVariants.length > 0) {
-        const insertVariants = parsedVariants.map((v, index) => ({
-          product_id: product.id,
-          variant_name: v.variantName,
-          sku: v.sku || `SKU-${product.id.substring(0, 5)}-${index + 1}`,
-          price: parseFloat(v.price),
-          discount_percentage: parseFloat(v.discountPercentage || 0),
-          stock: parseInt(v.stock) || 0,
-          image: v.image || null
-        }));
+        const insertVariants = [];
+        for (let i = 0; i < parsedVariants.length; i++) {
+          const v = parsedVariants[i];
+          let vImageUrl = v.image || null;
+
+          // Check if there is an uploaded file for this variant
+          if (req.files) {
+            const variantFile = req.files.find(f => f.fieldname === `variantImage_${i}`);
+            if (variantFile) {
+              vImageUrl = await uploadSupabaseFile(variantFile) || vImageUrl;
+            }
+          }
+
+          insertVariants.push({
+            product_id: product.id,
+            variant_name: v.variantName,
+            sku: v.sku || `SKU-${product.id.substring(0, 5)}-${i + 1}`,
+            price: parseFloat(v.price) || 0,
+            discount_percentage: parseFloat(v.discountPercentage || 0),
+            stock: parseInt(v.stock) || 0,
+            image: vImageUrl
+          });
+        }
 
         const { data: createdVariants, error: variantError } = await supabase
           .from('product_variants')
@@ -167,15 +176,89 @@ exports.createProduct = async (req, res) => {
 // @route   PUT /api/products/:id
 exports.updateProduct = async (req, res) => {
   try {
+    const {
+      name, description, price, originalPrice, category, occasion, 
+      relationship_tags, customizable, stock, features
+    } = req.body;
+
+    let imageUrls = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
+
+    // 1️⃣ Handle New Image Upload if provided
+    if (req.files && req.files.length > 0) {
+      const mainImageFiles = req.files.filter(f => f.fieldname === 'images');
+      for (const file of mainImageFiles) {
+        const url = await uploadSupabaseFile(file);
+        if (url) imageUrls.push(url);
+      }
+    }
+
+    // 2️⃣ Update Product in Database
     const { data: product, error } = await supabase
       .from('products')
-      .update(req.body)
+      .update({
+        name, 
+        description, 
+        price: price ? parseFloat(price) : undefined, 
+        original_price: originalPrice ? parseFloat(originalPrice) : null, 
+        category, 
+        occasion,
+        relationship_tags: relationship_tags ? (Array.isArray(relationship_tags) ? relationship_tags : [relationship_tags]) : undefined, 
+        customizable: customizable !== undefined ? (customizable === 'true' || customizable === true) : undefined, 
+        stock: stock ? parseInt(stock) : undefined, 
+        images: imageUrls.length > 0 ? imageUrls : undefined, 
+        features: features ? (Array.isArray(features) ? features : [features]) : undefined
+      })
       .eq('id', req.params.id)
       .select()
       .single();
+
     if (error) throw error;
+
+    // 3️⃣ Sync Variants
+    if (req.body.variants) {
+      const parsedVariants = typeof req.body.variants === 'string' ? JSON.parse(req.body.variants) : req.body.variants;
+      
+      if (Array.isArray(parsedVariants)) {
+        // Step A: Delete current variants (Sync approach)
+        await supabase.from('product_variants').delete().eq('product_id', req.params.id);
+
+        // Step B: Insert updated variants
+        if (parsedVariants.length > 0) {
+          const insertVariants = [];
+          for (let i = 0; i < parsedVariants.length; i++) {
+            const v = parsedVariants[i];
+            let vImageUrl = v.image || null;
+
+            if (req.files) {
+              const variantFile = req.files.find(f => f.fieldname === `variantImage_${i}`);
+              if (variantFile) {
+                vImageUrl = await uploadSupabaseFile(variantFile) || vImageUrl;
+              }
+            }
+
+            insertVariants.push({
+              product_id: req.params.id,
+              variant_name: v.variantName,
+              sku: v.sku || `SKU-${req.params.id.substring(0, 5)}-${i + 1}`,
+              price: parseFloat(v.price) || 0,
+              discount_percentage: parseFloat(v.discountPercentage || 0),
+              stock: parseInt(v.stock) || 0,
+              image: vImageUrl
+            });
+          }
+
+          const { error: variantError } = await supabase
+            .from('product_variants')
+            .insert(insertVariants);
+
+          if (variantError) console.error('Variant Update Error:', variantError);
+        }
+      }
+    }
+
     res.json({ success: true, product });
   } catch (err) {
+    console.error('Update Product Error:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 };

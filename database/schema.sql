@@ -48,7 +48,6 @@ CREATE TABLE IF NOT EXISTS products (
   rating DECIMAL(3, 1) DEFAULT 0 CHECK (rating BETWEEN 0 AND 5),
   review_count INTEGER DEFAULT 0 CHECK (review_count >= 0),
   featured BOOLEAN DEFAULT false,
-  same_day_delivery BOOLEAN DEFAULT false,
   vendor_id UUID REFERENCES users(id) ON DELETE SET NULL,
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -74,7 +73,6 @@ CREATE TABLE IF NOT EXISTS orders (
   tracking_number VARCHAR(255),
   gift_message TEXT,
   customizations JSONB,
-  same_day_delivery BOOLEAN DEFAULT false,
   coupon_code VARCHAR(50),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

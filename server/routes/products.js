@@ -16,8 +16,8 @@ router.get('/', getProducts);
 router.get('/featured', getFeatured);
 router.get('/categories', getCategories);
 router.get('/:id', getProduct);
-router.post('/', protect, adminOnly, upload.single('image'), createProduct);
-router.put('/:id', protect, adminOnly, updateProduct);
+router.post('/', protect, adminOnly, upload.any(), createProduct);
+router.put('/:id', protect, adminOnly, upload.any(), updateProduct);
 router.delete('/:id', protect, adminOnly, deleteProduct);
 
 module.exports = router;

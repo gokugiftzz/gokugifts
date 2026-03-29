@@ -15,7 +15,7 @@ exports.createOrder = async (req, res) => {
   try {
     const {
       items, shippingAddress, paymentMethod, couponCode,
-      giftMessage, customizations, sameDayDelivery
+      giftMessage, customizations
     } = req.body;
 
     // Calculate totals
@@ -42,7 +42,7 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    const shipping = sameDayDelivery ? 150 : (subtotal > 999 ? 0 : 99);
+    const shipping = subtotal > 999 ? 0 : 99;
     const total = subtotal - discount + shipping;
 
     // 3️⃣ Save Order
@@ -59,7 +59,6 @@ exports.createOrder = async (req, res) => {
         total,
         gift_message: giftMessage,
         customizations,
-        same_day_delivery: sameDayDelivery,
         status: 'pending',
         coupon_code: couponCode
       }])

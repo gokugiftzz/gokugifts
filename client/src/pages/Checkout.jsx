@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import styles from './Checkout.module.css';
 
 const Checkout = () => {
-  const { cart, cartTotal, hasSameDay, clearCart } = useCart();
+  const { cart, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -19,8 +19,7 @@ const Checkout = () => {
   });
 
   const shipping = cartTotal > 999 ? 0 : 99;
-  const sameDayCharge = hasSameDay ? 150 : 0;
-  const total = cartTotal + shipping + sameDayCharge;
+  const total = cartTotal + shipping;
 
   const handleWhatsAppOrder = async (e) => {
     e.preventDefault();
@@ -49,8 +48,7 @@ const Checkout = () => {
           zip: address.zip,
           phone: address.phone
         },
-        paymentMethod: 'WhatsApp Pay / UPI',
-        sameDayDelivery: hasSameDay
+        paymentMethod: 'WhatsApp Pay / UPI'
       };
 
       const res = await createOrder(orderData);
@@ -82,7 +80,7 @@ const Checkout = () => {
       message += `💰 *Order Summary*\n`;
       message += `━━━━━━━━━━━━━━━━━━\n`;
       message += `Subtotal: ₹${cartTotal.toLocaleString()}\n`;
-      message += `Delivery: ${shipping + sameDayCharge === 0 ? 'FREE' : `₹${shipping + sameDayCharge}`}\n`;
+      message += `Delivery: ${shipping === 0 ? 'FREE' : `₹${shipping}`}\n`;
       message += `━━━━━━━━━━━━━━\n`;
       message += `*Total Amount: ₹${total.toLocaleString()}*\n\n`;
 
@@ -250,12 +248,6 @@ const Checkout = () => {
                   <span>Shipping</span>
                   <span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
                 </div>
-                {hasSameDay && (
-                  <div className={styles.totalRow}>
-                    <span>Same Day Delivery</span>
-                    <span>₹{sameDayCharge}</span>
-                  </div>
-                )}
                 <div className={`${styles.totalRow} ${styles.grandTotal}`}>
                   <span>Payable Amount</span>
                   <span>₹{total.toLocaleString()}</span>

@@ -48,8 +48,62 @@
   transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
 }
 .navLink:hover { color: var(--primary); background: rgba(230, 57, 70, 0.05); }
-.aiLink { color: var(--purple) !important; }
 
+/* ── Category Dropdowns (Desktop) ── */
+.catDropdown { position: relative; }
+
+.catBtn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 12px; border: none; background: none;
+  font-family: inherit; font-size: 0.95rem; font-weight: 600;
+  color: #4b5563; cursor: pointer; border-radius: 8px;
+  transition: all 0.2s;
+}
+.catBtn:hover { color: var(--primary); background: rgba(230, 57, 70, 0.05); }
+
+.chevron { font-size: 0.8rem; transition: transform 0.25s; }
+.catDropdown:hover .chevron { transform: rotate(180deg); }
+
+.catPanel {
+  position: absolute; top: calc(100% + 10px); left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  width: 450px; background: #fff; border: 1px solid #eee;
+  border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+  padding: 16px; opacity: 0; visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+}
+.catDropdown:hover .catPanel { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+.catPanelHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f3f4f6;
+}
+.catPanelTitle { font-weight: 800; color: #111827; font-size: 0.9rem; }
+.viewAll { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+
+.panelGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+.panelCard {
+  display: flex; gap: 12px; align-items: center; text-decoration: none;
+  padding: 8px; border-radius: 12px; transition: background 0.2s;
+}
+.panelCard:hover { background: #f9fafb; }
+
+.panelImg {
+  width: 60px; height: 60px; border-radius: 8px;
+  background-size: cover; background-position: center; border: 1px solid #eee;
+}
+.panelInfo { display: flex; flex-direction: column; gap: 2px; }
+.panelName { font-size: 0.85rem; font-weight: 600; color: #374151; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.panelPrice { font-size: 0.8rem; font-weight: 800; color: var(--primary); }
+
+.panelMsg { text-align: center; color: #9ca3af; font-size: 0.85rem; padding: 20px 0; margin: 0; }
+.emptyPanel { text-align: center; padding: 24px 0; color: #9ca3af; }
+.emptyPanel p { margin: 8px 0 16px; font-size: 0.9rem; font-weight: 500; }
+.browseCta { display: inline-block; padding: 8px 16px; background: #f3f4f6; color: #374151; font-weight: 700; font-size: 0.8rem; border-radius: 8px; text-decoration: none; }
+
+/* ── Actions & Icons ── */
 .actions { display: flex; align-items: center; gap: 8px; }
 
 .iconBtn {
@@ -70,6 +124,7 @@
   border: 2px solid #fff;
 }
 
+/* ── User Menu Dropdown ── */
 .userMenu { position: relative; }
 .userBtn {
   width: 40px; height: 40px; border-radius: 50%;
@@ -86,14 +141,13 @@
   display: flex; align-items: center; justify-content: center;
 }
 
-
-
 .dropdown {
   position: absolute; top: calc(100% + 12px); right: 0;
   width: 240px; background: #fff;
   border: 1px solid #eee; border-radius: 16px;
   padding: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
   animation: fadeInUp 0.2s ease;
+  z-index: 1001;
 }
 .dropdownHeader { padding: 12px 12px 8px; border-bottom: 1px solid #f3f4f6; margin-bottom: 8px; }
 .dropdownHeader strong { display: block; font-size: 0.95rem; color: #111827; }
@@ -102,8 +156,10 @@
   display: block; width: 100%; padding: 10px 12px; text-decoration: none;
   color: #4b5563; border-radius: 10px; font-size: 0.9rem; font-weight: 500;
   transition: all 0.15s; border: none; background: none; cursor: pointer; text-align: left;
+  font-family: inherit;
 }
 .dropdownItem:hover { background: #f9fafb; color: var(--primary); }
+.dropdownDivider { border: none; border-top: 1px solid #f3f4f6; margin: 8px 0; }
 
 .menuBtn {
   display: none; width: 40px; height: 40px; border-radius: 10px;
@@ -111,40 +167,37 @@
 }
 @media (max-width: 900px) { .menuBtn { display: flex; align-items: center; justify-content: center; } }
 
-.searchBar {
-  background: #fff; border-top: 1px solid #eee; padding: 20px;
-}
+/* ── Search Bar ── */
+.searchBar { background: #fff; border-top: 1px solid #eee; padding: 20px; }
 .searchInput {
   flex: 1; padding: 12px 16px 12px 44px;
   background: #f9fafb; border: 1px solid #eee;
   border-radius: 12px; color: #111827;
 }
 
+/* ── Mobile Menu ── */
 .mobileMenu {
   background: #fff; padding: 20px; border-top: 1px solid #eee;
   display: flex; flex-direction: column; gap: 8px;
+  max-height: calc(100vh - 80px); overflow-y: auto;
 }
-.mobileLink {
-  padding: 12px 16px; text-decoration: none; color: #4b5563;
-  border-radius: 10px; font-weight: 600;
-}
+.mobileLink { padding: 12px 16px; text-decoration: none; color: #4b5563; border-radius: 10px; font-weight: 700; font-size: 0.95rem; }
 .mobileLink:hover { background: #f9fafb; color: var(--primary); }
 
-.loginBtn {
-  font-size: 0.85rem;
-  padding: 8px 16px !important;
-  font-weight: 700;
-  border-radius: 10px !important;
-}
+.mobileDivider { font-size: 0.7rem; font-weight: 800; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; padding: 16px 16px 4px; }
 
-@media (max-width: 600px) {
-  .logoImg { height: 40px; }
-  .loginBtn {
-    padding: 6px 12px !important;
-    font-size: 0.75rem !important;
-  }
+.mobileCatBtn {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border: none; background: none;
+  color: #111827; font-weight: 600; font-size: 0.95rem;
+  border-radius: 10px; cursor: pointer; text-align: left;
 }
+.mobileCatBtn:hover { background: #f9fafb; }
+.chevronOpen { transform: rotate(180deg); transition: transform 0.25s; }
 
+.mobileCatLink { display: block; padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--primary); font-weight: 700; text-decoration: none; }
+
+.loginBtn { font-size: 0.85rem; padding: 8px 16px !important; font-weight: 700; border-radius: 10px !important; }
 .logoutBtn { color: var(--primary) !important; font-weight: 700; }
 
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

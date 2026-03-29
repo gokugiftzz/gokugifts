@@ -7,16 +7,15 @@ import toast from 'react-hot-toast';
 import styles from './Cart.module.css';
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, cartTotal, cartCount, toggleSameDay } = useCart();
+  const { cart, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
   const [couponCode, setCouponCode] = useState('');
   const [coupon, setCoupon] = useState(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const navigate = useNavigate();
 
   const shipping = cartTotal > 999 ? 0 : 99;
-  const sameDayCharge = cart.filter(i => i.sameDayDelivery).length > 0 ? 150 : 0;
   const discount = coupon?.discount || 0;
-  const total = cartTotal + shipping + sameDayCharge - discount;
+  const total = cartTotal + shipping - discount;
 
   const handleCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -81,16 +80,6 @@ const Cart = () => {
                   )}
                   <span className={styles.itemPrice}>₹{item.price?.toLocaleString()}</span>
 
-                  {/* Same-day toggle per item */}
-                  <label className={styles.sameDayToggle}>
-                    <input
-                      type="checkbox"
-                      checked={item.sameDayDelivery}
-                      onChange={() => toggleSameDay(item.cartId)}
-                      style={{ accentColor: '#06d6a0' }}
-                    />
-                    <span>⚡ Same-day delivery (+₹150)</span>
-                  </label>
                 </div>
                 <div className={styles.itemActions}>
                   <div className={styles.qty}>
@@ -137,12 +126,7 @@ const Cart = () => {
                 <span>Subtotal ({cartCount} items)</span>
                 <span>₹{cartTotal.toLocaleString()}</span>
               </div>
-              {sameDayCharge > 0 && (
-                <div className={styles.row}>
-                  <span>⚡ Same-Day Delivery</span>
-                  <span>₹{sameDayCharge}</span>
-                </div>
-              )}
+
               <div className={styles.row}>
                 <span>Shipping</span>
                 <span>{shipping === 0 ? <span style={{ color: '#06d6a0' }}>FREE</span> : `₹${shipping}`}</span>

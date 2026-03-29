@@ -44,7 +44,6 @@ const ProductCard = ({ product, index = 0 }) => {
         {/* Badges */}
         <div className={styles.badges}>
           {discount > 0 && <span className={styles.discountBadge}>-{discount}%</span>}
-          {product.same_day_delivery && <span className={styles.deliveryBadge}><FiZap /> Same Day</span>}
         </div>
         {product.customizable && (
           <span className={styles.customBadge}><FiEdit3 /> Customizable</span>

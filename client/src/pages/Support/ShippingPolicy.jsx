@@ -20,7 +20,6 @@ const ShippingPolicy = () => {
             <ul>
               <li><strong>Free Shipping:</strong> On all orders above ₹999 within India.</li>
               <li><strong>Standard Delivery:</strong> A flat shipping fee of ₹49 for orders below ₹999.</li>
-              <li><strong>Same Day Delivery:</strong> Available for select items and locations at an additional cost of ₹149.</li>
             </ul>
           </section>
 

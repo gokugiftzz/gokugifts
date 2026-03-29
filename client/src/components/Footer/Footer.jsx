@@ -78,8 +78,7 @@ const Footer = () => {
             { icon: '🔒', text: 'Secure Checkout' },
             { icon: '🚚', text: 'Free Shipping ₹999+' },
             { icon: '🎁', text: 'Gift Wrapping' },
-            { icon: '↩️', text: '7-Day Returns' },
-            { icon: '⚡', text: 'Same Day Delivery' }
+            { icon: '↩️', text: '7-Day Returns' }
           ].map(badge => (
             <div key={badge.icon} className={styles.badge}>
               <span>{badge.icon}</span>

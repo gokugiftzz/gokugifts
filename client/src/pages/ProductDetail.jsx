@@ -14,7 +14,6 @@ const ProductDetail = () => {
   const [reviews, setReviews] = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [sameDayDelivery, setSameDayDelivery] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
   const [customText, setCustomText] = useState('');
   const [customImage, setCustomImage] = useState(null);
@@ -119,7 +118,6 @@ const ProductDetail = () => {
                 alt={product.name}
               />
               {discount > 0 && <span className={styles.discountLabel}>-{discount}%</span>}
-              {product.same_day_delivery && <span className={styles.deliveryLabel}><FiZap /> Same Day</span>}
             </div>
             {product.images?.length > 1 && (
               <div className={styles.thumbnails}>
@@ -253,23 +251,7 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Same Day Delivery */}
-            {product.same_day_delivery && (
-              <div className={styles.sameDaySection}>
-                <label className={styles.sameDayLabel}>
-                  <input
-                    type="checkbox"
-                    checked={sameDayDelivery}
-                    onChange={e => setSameDayDelivery(e.target.checked)}
-                    style={{ accentColor: '#06d6a0' }}
-                  />
-                  <div>
-                    <span className={styles.sameDayTitle}><FiZap /> Same Day Delivery</span>
-                    <span className={styles.sameDayInfo}>(+₹150) Delivered by tonight!</span>
-                  </div>
-                </label>
-              </div>
-            )}
+
 
             {/* Quantity */}
             <div className={styles.quantitySection}>

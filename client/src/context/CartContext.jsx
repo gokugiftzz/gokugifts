@@ -36,8 +36,7 @@ export const CartProvider = ({ children }) => {
         price: product.price,
         image: product.images?.[0],
         quantity,
-        customization,
-        sameDayDelivery: false
+        customization
       }];
     });
 
@@ -56,20 +55,13 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => setCart([]);
 
-  const toggleSameDay = (cartId) => {
-    setCart(prev => prev.map(item =>
-      item.cartId === cartId ? { ...item, sameDayDelivery: !item.sameDayDelivery } : item
-    ));
-  };
-
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const hasSameDay = cart.some(item => item.sameDayDelivery);
 
   return (
     <CartContext.Provider value={{
-      cart, addToCart, removeFromCart, updateQuantity, clearCart, toggleSameDay,
-      cartTotal, cartCount, hasSameDay
+      cart, addToCart, removeFromCart, updateQuantity, clearCart,
+      cartTotal, cartCount
     }}>
       {children}
     </CartContext.Provider>

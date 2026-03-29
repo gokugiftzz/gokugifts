@@ -150,32 +150,57 @@
 .featureTitle { font-size: 1rem; font-weight: 800; margin-bottom: 4px; color: #111827; }
 .featureDesc { font-size: 0.9rem; color: #6b7280; line-height: 1.5; }
 
-/* 🌟 Categories Grid */
 .catGrid {
   display: grid; 
-  grid-template-columns: repeat(4, 1fr); 
-  gap: 24px;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 20px;
 }
-@media (max-width: 1100px) { .catGrid { grid-template-columns: repeat(4, 1fr); gap: 16px;} }
-@media (max-width: 768px) { .catGrid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+@media (max-width: 1100px) { .catGrid { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+@media (max-width: 768px) { .catGrid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+@media (max-width: 480px) { .catGrid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 
 .catCard {
-  display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px;
-  background: #fff; border: 1px solid #eee;
-  border-radius: 24px; text-decoration: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border-bottom: 4px solid var(--cat-color);
+  position: relative;
+  display: block;
+  border-radius: 20px;
+  overflow: hidden;
+  text-decoration: none;
+  aspect-ratio: 4 / 3;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease;
 }
-.catCard:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
+.catCard:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
+
 .catImage { 
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
+  position: absolute;
+  inset: 0;
   background-size: cover; 
   background-position: center;
-  transition: transform 0.4s;
+  transition: transform 0.5s ease;
 }
-.catCard:hover .catImage { transform: scale(1.1); }
-.catName { font-size: 1.05rem; font-weight: 800; color: #111827; text-align: center; }
+.catCard:hover .catImage { transform: scale(1.08); }
+
+.catOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+  transition: background 0.3s;
+}
+.catCard:hover .catOverlay { background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); }
+
+.catName { 
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 18px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
 
 /* 🌟 AI Banner */
 .aiBanner {
