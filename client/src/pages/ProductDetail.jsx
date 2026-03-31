@@ -98,6 +98,33 @@ const ProductDetail = () => {
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
+  // Combine main product images with variant images
+  const allImages = [...(product.images || [])];
+  product.product_variants?.forEach(v => {
+    if (v.image && !allImages.includes(v.image)) {
+      allImages.push(v.image);
+    }
+  });
+
+  const handleThumbnailClick = (img, index) => {
+    setSelectedImage(index);
+    // Find if this image belongs to a variant
+    const matchingVariant = product.product_variants?.find(v => v.image === img);
+    if (matchingVariant) {
+      setSelectedVariant(matchingVariant);
+    }
+  };
+
+  const handleVariantSelect = (variant) => {
+    setSelectedVariant(variant);
+    if (variant.image) {
+      const imgIndex = allImages.indexOf(variant.image);
+      if (imgIndex !== -1) {
+        setSelectedImage(imgIndex);
+      }
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -115,15 +142,19 @@ const ProductDetail = () => {
           <div className={styles.imageSection}>
             <div className={styles.mainImage}>
               <img
-                src={getImageUrl(product.images?.[selectedImage] || product.images?.[0])}
+                src={getImageUrl(allImages[selectedImage] || allImages[0])}
                 alt={product.name}
               />
               {discount > 0 && <span className={styles.discountLabel}>-{discount}%</span>}
             </div>
-            {product.images?.length > 1 && (
+            {allImages.length > 1 && (
               <div className={styles.thumbnails}>
-                {product.images.map((img, i) => (
-                  <button key={i} className={`${styles.thumb} ${i === selectedImage ? styles.thumbActive : ''}`} onClick={() => setSelectedImage(i)}>
+                {allImages.map((img, i) => (
+                  <button 
+                    key={i} 
+                    className={`${styles.thumb} ${i === selectedImage ? styles.thumbActive : ''}`} 
+                    onClick={() => handleThumbnailClick(img, i)}
+                  >
                     <img src={getImageUrl(img)} alt={`View ${i+1}`} />
                   </button>
                 ))}
@@ -174,14 +205,7 @@ const ProductDetail = () => {
                     <button
                       key={variant.id}
                       className={`${styles.variantBtn} ${selectedVariant?.id === variant.id ? styles.variantActive : ''}`}
-                      onClick={() => {
-                        setSelectedVariant(variant);
-                        if (variant.image) {
-                          // Try to find if this variant image is in product images to sync preview
-                          const imgIndex = product.images.indexOf(variant.image);
-                          if (imgIndex !== -1) setSelectedImage(imgIndex);
-                        }
-                      }}
+                      onClick={() => handleVariantSelect(variant)}
                     >
                       {variant.variant_name}
                     </button>
@@ -255,8 +279,6 @@ const ProductDetail = () => {
                 </div>
               </div>
             )}
-
-
 
             {/* Quantity */}
             <div className={styles.quantitySection}>
