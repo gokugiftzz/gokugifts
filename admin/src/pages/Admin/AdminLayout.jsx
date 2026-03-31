@@ -1,22 +1,18 @@
 import React from 'react';
-import { NavLink, Outlet, Navigate } from 'react-router-dom';
-import { FiGrid, FiBox, FiShoppingBag, FiUsers, FiBarChart2, FiSettings, FiArrowLeft } from 'react-icons/fi';
-import { useAuth } from '../../context/AuthContext';
+import { NavLink, Outlet } from 'react-router-dom';
+import { FiGrid, FiBox, FiShoppingBag, FiUsers, FiBarChart2, FiSettings, FiArrowLeft, FiPackage } from 'react-icons/fi';
 import styles from './AdminLayout.module.css';
 
 const AdminLayout = () => {
-  const { user } = useAuth();
-
-  if (user?.role !== 'admin') {
-    return <Navigate to="/" replace />;
-  }
+  // Auth Bypassed by Request
+  const user = { name: 'Admin', role: 'admin' };
 
   return (
     <div className={styles.adminPage}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <div className={styles.logo}>GOKUGIFTS <span>ADMIN</span></div>
-          <a href="http://localhost:5173" className={styles.backBtn}><FiArrowLeft /> Back to Store</a>
+          <a href="/" className={styles.backBtn}><FiArrowLeft /> Back to Store</a>
         </div>
         
         <nav className={styles.nav}>

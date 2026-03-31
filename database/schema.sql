@@ -1,4 +1,4 @@
--- GokuGiftz Database Schema (Supabase PostgreSQL)
+-- GokuGiftz Unified Database Schema (Supabase PostgreSQL)
 -- This script is idempotent (can be run multiple times).
 
 -- Enable necessary extensions
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   UNIQUE(user_id, product_id)
 );
 
--- 6. Coupons Table
+-- 6. Product Variants Table
 CREATE TABLE IF NOT EXISTS product_variants (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   product_id UUID REFERENCES products(id) ON DELETE CASCADE NOT NULL,
@@ -117,7 +117,6 @@ CREATE TABLE IF NOT EXISTS product_variants (
   sku VARCHAR(100) UNIQUE NOT NULL,
   price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
   discount_percentage DECIMAL(5, 2) DEFAULT 0 CHECK (discount_percentage BETWEEN 0 AND 100),
-  discounted_price DECIMAL(10, 2) GENERATED ALWAYS AS (price - (price * discount_percentage / 100)) STORED,
   stock INTEGER DEFAULT 0 CHECK (stock >= 0),
   description TEXT,
   features TEXT[],
@@ -128,26 +127,7 @@ CREATE TABLE IF NOT EXISTS product_variants (
 
 CREATE INDEX IF NOT EXISTS idx_variant_product_id ON product_variants(product_id);
 
--- 1. Add missing columns to Products table
-ALTER TABLE products 
-ADD COLUMN IF NOT EXISTS product_code VARCHAR(50) UNIQUE,
-ADD COLUMN IF NOT EXISTS gift_type VARCHAR(50) DEFAULT 'Standard',
-ADD COLUMN IF NOT EXISTS personalization_options JSONB;
-
--- 2. Convert images column from TEXT[] to JSONB (if it's not already JSONB)
--- This is necessary for the new Image ID tracking system
-DO $$ 
-BEGIN 
-    IF (SELECT data_type FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'images') = 'ARRAY' THEN
-        ALTER TABLE products ALTER COLUMN images TYPE JSONB USING to_jsonb(images);
-    END IF;
-END $$;
-
--- 3. Add missing column to Orders table
-ALTER TABLE orders 
-ADD COLUMN IF NOT EXISTS order_code VARCHAR(50) UNIQUE;
-
--- 6. Inventory Pool Table (999 IDs)
+-- 7. Inventory Pool Table
 CREATE TABLE IF NOT EXISTS inventory_pool (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   product_code VARCHAR(50) UNIQUE NOT NULL,
@@ -159,7 +139,7 @@ CREATE TABLE IF NOT EXISTS inventory_pool (
 
 CREATE INDEX IF NOT EXISTS idx_inventory_pool_used ON inventory_pool(is_used);
 
--- 7. Admin Activity Logs
+-- 8. Admin Activity Logs
 CREATE TABLE IF NOT EXISTS admin_activity_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   admin_id UUID REFERENCES users(id),
@@ -173,3 +153,20 @@ CREATE TABLE IF NOT EXISTS admin_activity_logs (
 
 CREATE INDEX IF NOT EXISTS idx_admin_logs_admin ON admin_activity_logs(admin_id);
 CREATE INDEX IF NOT EXISTS idx_admin_logs_created ON admin_activity_logs(created_at);
+
+-- SAFE MIGRATIONS (Column check/add)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS product_code VARCHAR(50) UNIQUE;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS gift_type VARCHAR(50) DEFAULT 'Standard';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS personalization_options JSONB;
+
+DO $$ 
+BEGIN 
+    IF (SELECT data_type FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'images') = 'ARRAY' THEN
+        ALTER TABLE products ALTER COLUMN images TYPE JSONB USING to_jsonb(images);
+    END IF;
+END $$;
+
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_code VARCHAR(50) UNIQUE;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number VARCHAR(255);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS estimated_delivery DATE;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS history JSONB DEFAULT '[]'::jsonb;
