@@ -7,44 +7,34 @@ dotenv.config();
 
 const app = express();
 
-// Custom OPTIONS handler
+// Comprehensive CORS & Preflight Handler
 app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  const origin = req.headers.origin;
+  const allowed = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://gokugifts.vercel.app',
+    'https://gokugiftzz.vercel.app',
+    'https://gokugiftzzcom.vercel.app'
+  ];
+
+  if (origin && (allowed.includes(origin) || origin.endsWith('.vercel.app') || origin.includes('localhost'))) {
+    res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
+  } else {
+    // If no origin or not allowed, we don't send Allow-Origin to avoid failures
+    // Browsers will block restricted cross-origin requests by default
+  }
+
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+
+  if (req.method === 'OPTIONS') {
     return res.status(200).send();
   }
   next();
 });
 
-// Middleware
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'https://gokugifts.vercel.app',
-  'https://gokugiftzz.vercel.app',
-  'https://gokugiftzzcom.vercel.app'
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.includes('localhost')) {
-      return callback(null, true);
-    }
-    const msg = 'The CORS policy for this site does not allow access from the specified Origin: ' + origin;
-    return callback(new Error(msg), false);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
-}));
-
-// Handle preflight requests
-app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
