@@ -7,13 +7,13 @@ dotenv.config();
 
 const app = express();
 
-// Enhanced Production CORS Configuration
+// Universal Production CORS Configuration
 const corsOptions = {
-  origin: true, // Automatically mirrors the requesting origin (perfect for Vercel subdomains)
-  credentials: true,
+  origin: '*', // Absolute fix for cross-origin Bearer token requests (No Cookies used)
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
