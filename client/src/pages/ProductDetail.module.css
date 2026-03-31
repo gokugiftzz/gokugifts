@@ -39,7 +39,8 @@
 
 /* Details */
 .category { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 12px; }
-.name { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; margin-bottom: 16px; line-height: 1.25; color: #111827; font-family: 'Playfair Display', serif; }
+.name { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; margin-bottom: 8px; line-height: 1.25; color: #111827; font-family: 'Playfair Display', serif; }
+.productCode { font-size: 0.85rem; color: #94a3b8; font-family: monospace; margin-bottom: 20px; font-weight: 500; }
 
 .ratingRow { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
 .stars { display: flex; gap: 4px; color: #fbbf24; font-size: 1.2rem; }
@@ -51,8 +52,8 @@
 .originalPrice { font-size: 1.2rem; color: #9ca3af; text-decoration: line-through; }
 .discountPct { padding: 6px 16px; border-radius: 40px; background: #ecfdf5; color: #10b981; font-size: 0.95rem; font-weight: 800; border: 1px solid #d1fae5; }
 
-.features { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
-.feature { display: flex; align-items: center; gap: 10px; font-size: 1rem; color: #4b5563; font-weight: 500; }
+.featuresPreview { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #f1f5f9; }
+.feature { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: #4b5563; font-weight: 500; }
 .checkIcon { color: var(--accent); flex-shrink: 0; }
 
 /* Customization */
@@ -149,7 +150,7 @@
 .tabBtn:hover { color: #111827; }
 .tabActive { color: var(--primary) !important; border-bottom-color: var(--primary) !important; background: #fff5f5; }
 
-.tabContent {}
+
 .description { color: #4b5563; line-height: 1.85; font-size: 1.05rem; font-weight: 500; }
 
 .featureList { display: flex; flex-direction: column; gap: 16px; }

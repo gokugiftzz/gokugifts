@@ -145,3 +145,14 @@ END $$;
 ALTER TABLE orders 
 ADD COLUMN IF NOT EXISTS order_code VARCHAR(50) UNIQUE;
 
+-- 6. Inventory Pool Table (999 IDs)
+CREATE TABLE IF NOT EXISTS inventory_pool (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_code VARCHAR(50) UNIQUE NOT NULL,
+  product_name VARCHAR(255),
+  is_used BOOLEAN DEFAULT false,
+  product_id UUID REFERENCES products(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_inventory_pool_used ON inventory_pool(is_used);

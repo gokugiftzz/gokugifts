@@ -32,6 +32,9 @@ const AdminLayout = () => {
           <NavLink to="/users" className={({ isActive }) => isActive ? styles.active : styles.link}>
             <FiUsers /> Users
           </NavLink>
+          <NavLink to="/inventory" className={({ isActive }) => isActive ? styles.active : styles.link}>
+            <FiPackage /> Inventory
+          </NavLink>
           <NavLink to="/analytics" className={({ isActive }) => isActive ? styles.active : styles.link}>
             <FiBarChart2 /> Analytics
           </NavLink>

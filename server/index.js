@@ -40,6 +40,7 @@ const paymentRoutes = require('./routes/payment');
 const aiRoutes = require('./routes/ai');
 const adminRoutes = require('./routes/admin');
 const reviewRoutes = require('./routes/reviews');
+const inventoryRoutes = require('./routes/inventory');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -52,6 +53,7 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

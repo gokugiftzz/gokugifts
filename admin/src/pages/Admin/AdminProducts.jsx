@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiTrash2, FiEdit2, FiEye, FiDownload, FiSearch, FiAlertTriangle, FiX, FiImage, FiSettings } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import styles from './AdminProducts.module.css';
 import { getProducts, deleteAllProducts, deleteProduct, createProduct, updateProduct } from '../../utils/api';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
+  const [inventoryPool, setInventoryPool] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Modal State
@@ -42,7 +46,21 @@ const AdminProducts = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchInventory();
   }, []);
+
+  useEffect(() => {
+    if(showModal) fetchInventory();
+  }, [showModal]);
+
+  const fetchInventory = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/inventory`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      setInventoryPool(data.inventory.filter(i => !i.is_used || i.product_code === newProduct.product_code));
+    } catch (error) {}
+  };
 
   const fetchProducts = async () => {
     try {
@@ -220,7 +238,17 @@ const AdminProducts = () => {
   const handleAddVariant = () => {
     setNewProduct({
       ...newProduct,
-      variants: [...newProduct.variants, { variantName: '', price: newProduct.price || '', discountPercentage: 0, stock: 10, description: '', features: '', imageFile: null, imagePreview: null }]
+      variants: [...newProduct.variants, { 
+        variantName: '', 
+        sku: `SKU-${Date.now().toString().slice(-6)}-${newProduct.variants.length + 1}`,
+        price: newProduct.price || '', 
+        discountPercentage: 0, 
+        stock: 10, 
+        description: '', 
+        features: '', 
+        imageFile: null, 
+        imagePreview: null 
+      }]
     });
   };
 
@@ -341,11 +369,36 @@ const AdminProducts = () => {
               <div className={styles.formGrid}>
                 {/* Product Code */}
                 <div className={styles.formGroup} style={{ gridColumn: '1 / -1' }}>
-                  <label>Product Code (SKU - Unique ID)</label>
+                  <label>Product Code (Select from 999 IDs Pool)</label>
                   <div style={{ display: 'flex', gap: '10px' }}>
-                    <input type="text" className="input" required value={newProduct.product_code} onChange={e => setNewProduct({...newProduct, product_code: e.target.value})} placeholder="e.g. GFT-1001" style={{ flex: 1, padding: '10px' }} />
-                    <button type="button" onClick={generateProductCode} className="btn btn-secondary" style={{ padding: '0 15px' }}>Generate</button>
+                    <select 
+                      className="input" 
+                      style={{ flex: 1 }}
+                      value={inventoryPool.some(i => i.product_code === newProduct.product_code) ? newProduct.product_code : ''}
+                      onChange={e => {
+                        if(e.target.value) {
+                          setNewProduct({...newProduct, product_code: e.target.value});
+                        }
+                      }}
+                    >
+                      <option value="">-- Choose from available IDs --</option>
+                      {inventoryPool.map(item => (
+                        <option key={item.id} value={item.product_code}>{item.product_code} (Available)</option>
+                      ))}
+                      {newProduct.product_code && !inventoryPool.find(i => i.product_code === newProduct.product_code) && (
+                         <option value={newProduct.product_code}>{newProduct.product_code} (Current)</option>
+                      )}
+                    </select>
+                    <input 
+                      type="text" 
+                      className="input" 
+                      placeholder="Or enter manual ID" 
+                      style={{ width: '180px' }}
+                      value={newProduct.product_code} 
+                      onChange={e => setNewProduct({...newProduct, product_code: e.target.value})} 
+                    />
                   </div>
+                  <small style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '4px' }}>Every product must have a unique ID for easy tracking in the inventory.</small>
                 </div>
 
                 <div className={styles.formGroup}>
@@ -520,6 +573,17 @@ const AdminProducts = () => {
                                 required
                               />
                             </div>
+                            <div className={styles.miniField}>
+                              <label>SKU / Variant ID</label>
+                              <div style={{ display: 'flex', gap: 4 }}>
+                                <input 
+                                  type="text" className="input-sm" 
+                                  value={variant.sku} 
+                                  onChange={e => handleUpdateVariant(index, 'sku', e.target.value)}
+                                />
+                                <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleUpdateVariant(index, 'sku', `VAR-${Math.floor(1000+Math.random()*9000)}`)} style={{fontSize:'0.6rem', padding:'2px 5px'}}>Auto</button>
+                              </div>
+                            </div>
                             <div className={styles.miniFieldRow}>
                               <div className={styles.miniField}>
                                 <label>Price (₹)</label>
@@ -530,18 +594,18 @@ const AdminProducts = () => {
                                 <input type="number" className="input-sm" value={variant.stock} onChange={e => handleUpdateVariant(index, 'stock', e.target.value)} required />
                               </div>
                             </div>
-                            <div className={styles.miniField} style={{ marginTop: '10px' }}>
-                              <label>Variant Description (Specific to this style)</label>
+                            <div className={styles.miniField} style={{ marginTop: '5px' }}>
+                              <label>Description</label>
                               <textarea 
-                                className="input-sm" rows="2" placeholder="Describe this specific variant..."
+                                className="input-sm" rows="2" placeholder="Variant specific details..."
                                 value={variant.description} 
                                 onChange={e => handleUpdateVariant(index, 'description', e.target.value)}
                               />
                             </div>
                             <div className={styles.miniField} style={{ marginTop: '5px' }}>
-                              <label>Variant Features (Specific to this style, comma separated)</label>
+                              <label>Features (comma separated)</label>
                               <input 
-                                type="text" className="input-sm" placeholder="e.g. Smooth finish, Fast delivery"
+                                type="text" className="input-sm" placeholder="Fast shipping, etc."
                                 value={variant.features} 
                                 onChange={e => handleUpdateVariant(index, 'features', e.target.value)}
                               />

@@ -8,6 +8,7 @@ const AdminDashboard = lazy(() => import('./pages/Admin/Dashboard'));
 const AdminProducts = lazy(() => import('./pages/Admin/AdminProducts'));
 const AdminOrders = lazy(() => import('./pages/Admin/AdminOrders'));
 const AdminUsers = lazy(() => import('./pages/Admin/AdminUsers'));
+const AdminInventory = lazy(() => import('./pages/Admin/AdminInventory'));
 const Login = lazy(() => import('./pages/Login'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -29,6 +30,7 @@ function App() {
             <Route path="products" element={<AdminProducts />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="inventory" element={<AdminInventory />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

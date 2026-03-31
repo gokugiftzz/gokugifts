@@ -135,6 +135,7 @@ const ProductDetail = () => {
           <div className={styles.details}>
             <div className={styles.category}>{product.category}</div>
             <h1 className={styles.name}>{product.name}</h1>
+            <div className={styles.productCode}>SKU: {selectedVariant ? selectedVariant.sku : product.product_code}</div>
 
             {/* Rating */}
             <div className={styles.ratingRow}>
@@ -189,10 +190,13 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Features */}
-            {product.features && (
-              <div className={styles.features}>
-                {product.features.map(f => (
+            {/* Features Preview */}
+            {(selectedVariant?.features || product.features) && (
+              <div className={styles.featuresPreview}>
+                {(typeof (selectedVariant?.features || product.features) === 'string' 
+                  ? (selectedVariant?.features || product.features).split(',') 
+                  : (selectedVariant?.features || product.features)
+                ).slice(0, 3).map(f => (
                   <div key={f} className={styles.feature}><FiCheck className={styles.checkIcon} />{f}</div>
                 ))}
               </div>
@@ -330,12 +334,15 @@ const ProductDetail = () => {
           <div className={styles.tabContent}>
             {activeTab === 'description' && (
               <div className={styles.description}>
-                <p>{product.description}</p>
+                <p>{selectedVariant?.description || product.details || product.description}</p>
               </div>
             )}
             {activeTab === 'features' && (
               <div className={styles.featureList}>
-                {product.features?.map(f => (
+                {(typeof (selectedVariant?.features || product.features) === 'string' 
+                  ? (selectedVariant?.features || product.features).split(',') 
+                  : (selectedVariant?.features || product.features)
+                )?.map(f => (
                   <div key={f} className={styles.featureItem}><FiCheck className={styles.checkIcon} />{f}</div>
                 ))}
               </div>
