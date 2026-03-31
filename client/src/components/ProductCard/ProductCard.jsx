@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiHeart, FiShoppingCart, FiStar, FiZap, FiEdit3 } from 'react-icons/fi';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { getImageUrl } from '../../utils/helpers';
 import styles from './ProductCard.module.css';
 
 const ProductCard = ({ product, index = 0 }) => {
@@ -31,7 +32,7 @@ const ProductCard = ({ product, index = 0 }) => {
       {/* Image */}
       <Link to={`/products/${product.id}`} className={styles.imageWrapper}>
         <img
-          src={imgError ? 'https://via.placeholder.com/400x400?text=🎁' : (product.images?.[0] || 'https://via.placeholder.com/400x400?text=🎁')}
+          src={imgError ? 'https://placehold.co/400x400/f3f4f6/374151?text=Gift' : getImageUrl(product.images?.[0])}
           alt={product.name}
           className={styles.image}
           onError={() => setImgError(true)}

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../utils/helpers';
 
 const CartContext = createContext();
 
@@ -34,7 +35,7 @@ export const CartProvider = ({ children }) => {
         productId: product.id,
         name: product.name,
         price: product.price,
-        image: product.images?.[0],
+        image: getImageUrl(product.images?.[0]),
         quantity,
         customization
       }];

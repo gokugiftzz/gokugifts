@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiPlus, FiMinus, FiTag, FiArrowRight, FiShoppingBag } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { validateCoupon } from '../utils/api';
+import { getImageUrl } from '../utils/helpers';
 import toast from 'react-hot-toast';
 import styles from './Cart.module.css';
 
@@ -69,7 +70,7 @@ const Cart = () => {
             {cart.map(item => (
               <div key={item.cartId} className={styles.item}>
                 <Link to={`/products/${item.productId}`} className={styles.itemImage}>
-                  <img src={item.image || 'https://via.placeholder.com/100?text=🎁'} alt={item.name} onError={e => e.target.src = 'https://via.placeholder.com/100?text=🎁'} />
+                  <img src={getImageUrl(item.image)} alt={item.name} onError={e => e.target.src = 'https://placehold.co/100/f3f4f6/374151?text=Gift'} />
                 </Link>
                 <div className={styles.itemDetails}>
                   <Link to={`/products/${item.productId}`} className={styles.itemName}>{item.name}</Link>

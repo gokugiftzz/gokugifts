@@ -4,6 +4,7 @@ import { FiChevronLeft, FiMapPin, FiTruck, FiCheckCircle, FiAlertCircle, FiMessa
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { createOrder } from '../utils/api';
+import { getImageUrl } from '../utils/helpers';
 import toast from 'react-hot-toast';
 import styles from './Checkout.module.css';
 
@@ -231,7 +232,7 @@ const Checkout = () => {
               <div className={styles.itemList}>
                 {cart.map(item => (
                   <div key={item.cartId} className={styles.orderItem}>
-                    <img src={item.image} alt={item.name} />
+                    <img src={getImageUrl(item.image)} alt={item.name} />
                     <div className={styles.orderItemInfo}>
                       <span className={styles.orderItemName}>{item.name}</span>
                       <span className={styles.orderItemPrice}>Qty: {item.quantity} × ₹{item.price}</span>

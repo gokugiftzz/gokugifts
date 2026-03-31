@@ -4,6 +4,7 @@ import { FiStar, FiShoppingCart, FiHeart, FiShare2, FiZap, FiPackage, FiEdit3, F
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { getProduct, getReviews } from '../utils/api';
+import { getImageUrl } from '../utils/helpers';
 
 import toast from 'react-hot-toast';
 import styles from './ProductDetail.module.css';
@@ -66,7 +67,7 @@ const ProductDetail = () => {
           variantId: selectedVariant.id,
           variantName: selectedVariant.variant_name,
           sku: selectedVariant.sku,
-          image: selectedVariant.image || product.images?.[0]
+          image: getImageUrl(selectedVariant.image || product.images?.[0])
         }
       : product;
 
@@ -114,7 +115,7 @@ const ProductDetail = () => {
           <div className={styles.imageSection}>
             <div className={styles.mainImage}>
               <img
-                src={product.images?.[selectedImage] || product.images?.[0]}
+                src={getImageUrl(product.images?.[selectedImage] || product.images?.[0])}
                 alt={product.name}
               />
               {discount > 0 && <span className={styles.discountLabel}>-{discount}%</span>}
@@ -123,7 +124,7 @@ const ProductDetail = () => {
               <div className={styles.thumbnails}>
                 {product.images.map((img, i) => (
                   <button key={i} className={`${styles.thumb} ${i === selectedImage ? styles.thumbActive : ''}`} onClick={() => setSelectedImage(i)}>
-                    <img src={img} alt={`View ${i+1}`} />
+                    <img src={getImageUrl(img)} alt={`View ${i+1}`} />
                   </button>
                 ))}
               </div>
@@ -204,7 +205,7 @@ const ProductDetail = () => {
                 <div className={styles.customPreview}>
                   <div className={styles.previewCanvas}>
                     <img
-                      src={product.images?.[0]}
+                      src={getImageUrl(product.images?.[0])}
                       alt="Preview"
                       className={styles.previewBase}
                     />
