@@ -77,6 +77,8 @@ CREATE TABLE IF NOT EXISTS orders (
   total DECIMAL(10, 2) NOT NULL CHECK (total >= 0),
   status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled')),
   tracking_number VARCHAR(255),
+  estimated_delivery DATE,
+  history JSONB DEFAULT '[]'::jsonb,
   gift_message TEXT,
   customizations JSONB,
   coupon_code VARCHAR(50),
@@ -156,3 +158,18 @@ CREATE TABLE IF NOT EXISTS inventory_pool (
 );
 
 CREATE INDEX IF NOT EXISTS idx_inventory_pool_used ON inventory_pool(is_used);
+
+-- 7. Admin Activity Logs
+CREATE TABLE IF NOT EXISTS admin_activity_logs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  admin_id UUID REFERENCES users(id),
+  action VARCHAR(255) NOT NULL,
+  target_type VARCHAR(100),
+  target_id UUID,
+  details JSONB,
+  ip_address VARCHAR(45),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_logs_admin ON admin_activity_logs(admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_logs_created ON admin_activity_logs(created_at);

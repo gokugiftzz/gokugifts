@@ -1,5 +1,6 @@
 const supabase = require('../config/supabase');
 const cloudinary = require('../config/cloudinary');
+const { logActivity } = require('../utils/activityLogger');
 
 // @desc    Get all products
 // @route   GET /api/products
@@ -191,6 +192,9 @@ exports.createProduct = async (req, res) => {
       }
     }
 
+    // Log Activity
+    await logActivity(req, 'CREATE_PRODUCT', 'product', product.id, { name: product.name, product_code: pCode });
+
     res.status(201).json({ success: true, product: { ...product, product_variants: variantsData } });
   } catch (err) {
     console.error('Create Product Error:', err);
@@ -308,6 +312,9 @@ exports.updateProduct = async (req, res) => {
         }
       }
     }
+
+    // Log Activity
+    await logActivity(req, 'UPDATE_PRODUCT', 'product', product.id, { name: product.name });
 
     res.json({ success: true, product });
   } catch (err) {

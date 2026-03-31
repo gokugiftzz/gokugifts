@@ -4,8 +4,8 @@ const supabase = require('./config/supabase');
 
 async function createAdmin() {
   try {
-    const email = 'admin@gokugifts.com';
-    const password = 'AdminPassword123';
+    const email = process.env.ADMIN_EMAIL || 'admin@gokugifts.com';
+    const password = process.env.ADMIN_PASSWORD || 'AdminPassword123';
     const hashedPassword = await bcrypt.hash(password, 12);
     
     // Check if user exists

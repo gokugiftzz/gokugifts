@@ -32,17 +32,21 @@ const AdminOrders = () => {
     }
   };
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (orderId, updateData) => {
     try {
       if (isUpdatingStatus) return;
       setIsUpdatingStatus(true);
-      await updateOrderStatus(orderId, { status: newStatus });
-      toast.success(`Order ${newStatus} successfully!`);
       
-      // Update local state without fetching all again to prevent layout shift jumping
-      setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      const res = await updateOrderStatus(orderId, updateData);
+      
+      const status = updateData.status;
+      toast.success(`Order ${status} successfully!`);
+      
+      // Update local state without fetching all again
+      const updatedOrder = res.data.order;
+      setOrders(orders.map(o => o.id === orderId ? updatedOrder : o));
       if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: newStatus });
+        setSelectedOrder(updatedOrder);
       }
     } catch (err) {
       toast.error('Failed to update status');
@@ -339,21 +343,65 @@ const AdminOrders = () => {
                 </div>
               </div>
 
-              {/* Status Update */}
-              <select 
-                className={styles.statusUpdateSelect}
-                value={selectedOrder.status} 
-                onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
-                disabled={isUpdatingStatus}
-              >
-                <option value="pending">Mark as Pending</option>
-                <option value="confirmed">Mark as Confirmed</option>
-                <option value="processing">Mark as Processing</option>
-                <option value="packed">Mark as Packed</option>
-                <option value="shipped">Mark as Shipped</option>
-                <option value="delivered">Mark as Delivered</option>
-                <option value="cancelled">Cancel Order</option>
-              </select>
+              {/* Order History Timeline */}
+              <h3 className={styles.sectionTitle} style={{marginTop: '30px'}}><FiClock /> Status History Timeline</h3>
+              <div className={styles.timeline}>
+                {selectedOrder.history && Array.isArray(selectedOrder.history) && selectedOrder.history.length > 0 ? (
+                  <div className={styles.timelineList}>
+                    {selectedOrder.history.map((h, i) => (
+                      <div key={i} className={styles.timelineItem}>
+                        <div className={styles.timelineDot}></div>
+                        <div className={styles.timelineContent}>
+                          <div className={styles.timelineHeader}>
+                            <span className={styles.timelineStatus}>{h.status.toUpperCase()}</span>
+                            <span className={styles.timelineTime}>{new Date(h.time).toLocaleString()}</span>
+                          </div>
+                          <p className={styles.timelineMessage}>{h.message}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.noHistory}>No history available for this order.</p>
+                )}
+              </div>
+
+              {/* Status Update Actions */}
+              <div className={styles.statusActions}>
+                <h3 className={styles.sectionTitle}><FiTrendingUp /> Update Order Status</h3>
+                <div className={styles.updateStatusGrid}>
+                  <div className={styles.inputGroup}>
+                    <label>New Status</label>
+                    <select 
+                      className={styles.statusUpdateSelect}
+                      value={selectedOrder.status} 
+                      onChange={(e) => handleStatusChange(selectedOrder.id, { status: e.target.value })}
+                      disabled={isUpdatingStatus}
+                    >
+                      <option value="pending">Mark as Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="processing">Processing</option>
+                      <option value="packed">Packed</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancel Order</option>
+                    </select>
+                  </div>
+                  
+                  {selectedOrder.status === 'shipped' && (
+                    <div className={styles.inputGroup}>
+                      <label>Tracking Number</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. DELIV-12345" 
+                        defaultValue={selectedOrder.tracking_number}
+                        onBlur={(e) => handleStatusChange(selectedOrder.id, { status: 'shipped', trackingNumber: e.target.value })}
+                        className={styles.modalInput}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
 
             </div>
           </div>

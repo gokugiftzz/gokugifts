@@ -1,5 +1,6 @@
 const supabase = require('../config/supabase');
 const Razorpay = require('razorpay');
+const { logActivity } = require('../utils/activityLogger');
 
 const razorpayKeyId = process.env.RAZORPAY_KEY_ID || 'placeholder_key_id';
 const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret';
@@ -45,7 +46,9 @@ exports.createOrder = async (req, res) => {
     const shipping = subtotal > 999 ? 0 : 99;
     const total = subtotal - discount + shipping;
 
-    const orderCode = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(1000 + Math.random() * 9000);
+    const orderCode = `ORD-${timestamp}-${random}`;
 
     // 3️⃣ Save Order
     const { data: order, error } = await supabase
@@ -63,7 +66,8 @@ exports.createOrder = async (req, res) => {
         gift_message: giftMessage,
         customizations,
         status: 'pending',
-        coupon_code: couponCode
+        coupon_code: couponCode,
+        history: [{ status: 'pending', time: new Date().toISOString(), message: 'Order placed successfully' }]
       }])
       .select()
       .single();
@@ -135,14 +139,40 @@ exports.getOrder = async (req, res) => {
 // @route   PUT /api/orders/:id/status
 exports.updateOrderStatus = async (req, res) => {
   try {
-    const { status, trackingNumber } = req.body;
+    const { status, trackingNumber, note } = req.body;
+    
+    // Fetch current order to get history
+    const { data: currentOrder } = await supabase.from('orders').select('history').eq('id', req.params.id).single();
+    const updatedHistory = [...(currentOrder?.history || [])];
+    updatedHistory.push({
+      status,
+      time: new Date().toISOString(),
+      message: note || `Order status updated to ${status}`
+    });
+
+    const updateData = { 
+      status, 
+      tracking_number: trackingNumber,
+      history: updatedHistory
+    };
+
+    if (status === 'shipped') {
+      const deliveryDate = new Date();
+      deliveryDate.setDate(deliveryDate.getDate() + 5);
+      updateData.estimated_delivery = deliveryDate.toISOString().split('T')[0];
+    }
+
     const { data: order, error } = await supabase
       .from('orders')
-      .update({ status, tracking_number: trackingNumber })
+      .update(updateData)
       .eq('id', req.params.id)
       .select()
       .single();
     if (error) throw error;
+
+    // Log admin activity
+    await logActivity(req, 'UPDATE_ORDER_STATUS', 'order', order.id, { from: currentOrder.status, to: status, order_code: order.order_code });
+
     res.json({ success: true, order });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
