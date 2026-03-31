@@ -25,6 +25,8 @@ const AdminProducts = () => {
     customizable: false,
     productType: 'single', // 'single' | 'variable'
     gift_type: 'Standard', // Standard | Combo | Personalized
+    features: [''], // Array of features
+    details: '', // Detailed technical description
     personalization_options: {
       namePrint: false,
       photoUpload: false,
@@ -117,6 +119,8 @@ const AdminProducts = () => {
       customizable: product.customizable || false,
       productType: hasVariants ? 'variable' : 'single',
       gift_type: product.gift_type || 'Standard',
+      features: product.features || [''],
+      details: product.details || '',
       personalization_options: product.personalization_options || { namePrint: false, photoUpload: false, customMessage: false },
       imageFiles: [],
       existingImages: existingImagesList,
@@ -124,7 +128,9 @@ const AdminProducts = () => {
          ...v, 
          variantName: v.variant_name, 
          discountPercentage: v.discount_percentage,
-         imagePreview: v.image
+         imagePreview: v.image,
+         description: v.description || '',
+         features: v.features || ''
       })) : []
     });
     setPreviews(previewUrls);
@@ -153,6 +159,8 @@ const AdminProducts = () => {
       formData.append('personalization_options', JSON.stringify(newProduct.personalization_options));
       formData.append('name', newProduct.name);
       formData.append('description', newProduct.description);
+      formData.append('details', newProduct.details);
+      formData.append('features', JSON.stringify(newProduct.features.filter(f => f.trim() !== '')));
       formData.append('price', parseFloat(newProduct.price));
       if(newProduct.originalPrice) formData.append('originalPrice', parseFloat(newProduct.originalPrice)); 
       formData.append('category', newProduct.category);
@@ -212,7 +220,7 @@ const AdminProducts = () => {
   const handleAddVariant = () => {
     setNewProduct({
       ...newProduct,
-      variants: [...newProduct.variants, { variantName: '', price: newProduct.price || '', discountPercentage: 0, stock: 10, imageFile: null, imagePreview: null }]
+      variants: [...newProduct.variants, { variantName: '', price: newProduct.price || '', discountPercentage: 0, stock: 10, description: '', features: '', imageFile: null, imagePreview: null }]
     });
   };
 
@@ -382,6 +390,34 @@ const AdminProducts = () => {
                 </div>
               </div>
 
+              {/* Features List */}
+              <div className={styles.formGroup} style={{ marginTop: 20 }}>
+                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  Product Features (Bullet Points)
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => setNewProduct({...newProduct, features: [...newProduct.features, '']})}>
+                    + Add Bullet
+                  </button>
+                </label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+                  {newProduct.features.map((feat, idx) => (
+                    <div key={idx} style={{ display: 'flex', gap: '8px' }}>
+                      <input 
+                        type="text" className="input" placeholder="e.g. 100% Cotton, Hand-made"
+                        value={feat} onChange={e => {
+                          const f = [...newProduct.features];
+                          f[idx] = e.target.value;
+                          setNewProduct({...newProduct, features: f});
+                        }} 
+                      />
+                      <button type="button" className={styles.deleteBtn} onClick={() => {
+                        const f = newProduct.features.filter((_, i) => i !== idx);
+                        setNewProduct({...newProduct, features: f.length > 0 ? f : ['']});
+                      }}><FiTrash2 /></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Personalization Options */}
               <div className={styles.formGroup} style={{ marginTop: 20, padding: 15, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
                 <label style={{ fontSize: '1rem', color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -436,8 +472,13 @@ const AdminProducts = () => {
               </div>
               
               <div className={styles.formGroup} style={{ marginTop: 16 }}>
-                <label>Description</label>
-                <textarea className="input" rows="3" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})}></textarea>
+                <label>Short Description (SEO / List View)</label>
+                <textarea className="input" rows="2" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})}></textarea>
+              </div>
+
+              <div className={styles.formGroup} style={{ marginTop: 16 }}>
+                <label>Full Product Details (Complete Page Description)</label>
+                <textarea className="input" rows="6" value={newProduct.details} onChange={e => setNewProduct({...newProduct, details: e.target.value})} placeholder="Write detailed story or technical specifications..."></textarea>
               </div>
 
               {/* Variants Section */}
@@ -469,11 +510,11 @@ const AdminProducts = () => {
                           {/* Variant Data */}
                           <div className={styles.variantFields}>
                             <div className={styles.miniField}>
-                              <label>Variant Name / Color / Size</label>
+                              <label>Variant Name</label>
                               <input 
                                 type="text" 
                                 className="input-sm" 
-                                placeholder="e.g. Red, XL, 500g" 
+                                placeholder="e.g. Red / Large" 
                                 value={variant.variantName} 
                                 onChange={e => handleUpdateVariant(index, 'variantName', e.target.value)}
                                 required
@@ -482,24 +523,28 @@ const AdminProducts = () => {
                             <div className={styles.miniFieldRow}>
                               <div className={styles.miniField}>
                                 <label>Price (₹)</label>
-                                <input 
-                                  type="number" 
-                                  className="input-sm" 
-                                  value={variant.price} 
-                                  onChange={e => handleUpdateVariant(index, 'price', e.target.value)}
-                                  required
-                                />
+                                <input type="number" className="input-sm" value={variant.price} onChange={e => handleUpdateVariant(index, 'price', e.target.value)} required />
                               </div>
                               <div className={styles.miniField}>
                                 <label>Stock</label>
-                                <input 
-                                  type="number" 
-                                  className="input-sm" 
-                                  value={variant.stock} 
-                                  onChange={e => handleUpdateVariant(index, 'stock', e.target.value)}
-                                  required
-                                />
+                                <input type="number" className="input-sm" value={variant.stock} onChange={e => handleUpdateVariant(index, 'stock', e.target.value)} required />
                               </div>
+                            </div>
+                            <div className={styles.miniField} style={{ marginTop: '10px' }}>
+                              <label>Variant Description (Specific to this style)</label>
+                              <textarea 
+                                className="input-sm" rows="2" placeholder="Describe this specific variant..."
+                                value={variant.description} 
+                                onChange={e => handleUpdateVariant(index, 'description', e.target.value)}
+                              />
+                            </div>
+                            <div className={styles.miniField} style={{ marginTop: '5px' }}>
+                              <label>Variant Features (Specific to this style, comma separated)</label>
+                              <input 
+                                type="text" className="input-sm" placeholder="e.g. Smooth finish, Fast delivery"
+                                value={variant.features} 
+                                onChange={e => handleUpdateVariant(index, 'features', e.target.value)}
+                              />
                             </div>
                           </div>
                           <button type="button" className={styles.removeVariantBtn} onClick={() => handleRemoveVariant(index)}>

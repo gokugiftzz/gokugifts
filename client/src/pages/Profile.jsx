@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiUser, FiPackage, FiHeart, FiSettings, FiLogOut, FiEdit3, FiSave, FiX } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import { updateProfile } from '../utils/api';
+import { updateProfile, getMyOrders } from '../utils/api';
+import { getImageUrl } from '../utils/helpers';
 import toast from 'react-hot-toast';
 import styles from './Profile.module.css';
+import { useEffect } from 'react';
 
 const Profile = () => {
   const { user, logout, updateUser } = useAuth();
@@ -15,6 +17,26 @@ const Profile = () => {
     phone: user?.phone || '',
     avatar: user?.avatar || ''
   });
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [expandedOrder, setExpandedOrder] = useState(null);
+
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      fetchOrders();
+    }
+  }, [activeTab]);
+
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const res = await getMyOrders();
+      setOrders(res.data.orders || []);
+    } catch (err) {
+      toast.error('Failed to load orders history.');
+    } finally {
+      setOrdersLoading(false); }
+  };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -43,7 +65,10 @@ const Profile = () => {
             <div className={styles.userText}>
               <h1>{user?.name}</h1>
               <p>{user?.email}</p>
-              <span className={styles.badge}>{user?.role?.toUpperCase()}</span>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <span className={styles.badge}>{user?.role?.toUpperCase()}</span>
+                <span className={styles.reviewCounter}>⭐ {user?.review_count || 0} Reviews Posted</span>
+              </div>
             </div>
           </div>
           <button className={styles.logoutBtn} onClick={logout}><FiLogOut /> Logout</button>
@@ -106,12 +131,100 @@ const Profile = () => {
 
             {activeTab === 'orders' && (
               <div className={styles.card}>
-                <h3>Your Recent Orders</h3>
-                <div className={styles.emptyCard}>
-                  <FiPackage />
-                  <p>You haven't placed any orders yet.</p>
-                  <Link to="/products" className="btn btn-primary">Start Gifting</Link>
+                <div className={styles.cardHeader}>
+                  <h3>Your Order History</h3>
+                  <button className="btn btn-ghost btn-sm" onClick={fetchOrders} disabled={ordersLoading}>
+                    {ordersLoading ? 'Refreshing...' : 'Refresh'}
+                  </button>
                 </div>
+                
+                {orders.length > 0 ? (
+                  <div className={styles.orderList}>
+                    {orders.map(order => (
+                      <div key={order.id} className={styles.orderItem}>
+                        <div className={styles.orderHead}>
+                          <div>
+                            <span className={styles.orderId}>Order #{order.order_code || order.id.substring(0,8)}</span>
+                            <span className={styles.orderDate}>{new Date(order.created_at).toLocaleDateString()}</span>
+                          </div>
+                          <span className={`${styles.statusBadge} ${styles[order.status?.toLowerCase()]}`}>
+                            {order.status?.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className={styles.orderItemsPreview}>
+                          {order.items?.map((item, idx) => (
+                            <div key={idx} className={styles.miniItem}>
+                              <img src={getImageUrl(item.image)} alt="" />
+                              <div className={styles.miniItemInfo}>
+                                <strong>{item.name}</strong>
+                                <span>Qty: {item.quantity} × ₹{item.price}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className={styles.orderFoot}>
+                          <span>Total Amount: <strong>₹{order.total?.toLocaleString()}</strong></span>
+                          <button className="btn btn-ghost btn-sm" onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}>
+                            {expandedOrder === order.id ? 'Hide Details' : 'View Details'}
+                          </button>
+                        </div>
+
+                        {expandedOrder === order.id && (
+                          <div className={styles.expandedDetails}>
+                            <div className={styles.detailGrid}>
+                              <div className={styles.detailSection}>
+                                <h4>Shipping Address</h4>
+                                <p>{order.shipping_address?.street}</p>
+                                <p>{order.shipping_address?.city}, {order.shipping_address?.state} - {order.shipping_address?.zip}</p>
+                                <p>Phone: {order.shipping_address?.phone}</p>
+                              </div>
+                              <div className={styles.detailSection}>
+                                <h4>Payment Info</h4>
+                                <p>Method: {order.payment_method}</p>
+                                <p>Status: <span className={styles.paymentStatus}>{order.payment_status?.toUpperCase()}</span></p>
+                              </div>
+                            </div>
+                            <div className={styles.fullItems}>
+                              <h4>Detailed Item List</h4>
+                              {order.items?.map((item, idx) => (
+                                <div key={idx} className={styles.fullItem}>
+                                  <div style={{ display: 'flex', gap: 12 }}>
+                                    <img src={getImageUrl(item.image)} alt="" />
+                                    <div>
+                                      <strong>{item.name}</strong>
+                                      {item.variantName && <span className={styles.itemVariant}>Variant: {item.variantName}</span>}
+                                      {item.customization && (
+                                        <div className={styles.itemCustomization}>
+                                          {item.customization.text && <p>Note: "{item.customization.text}"</p>}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className={styles.itemPricing}>
+                                    <span>{item.quantity} × ₹{item.price}</span>
+                                    <strong>₹{item.quantity * item.price}</strong>
+                                  </div>
+                                </div>
+                              ))}
+                              <div className={styles.summaryBreakdown}>
+                                <div className={styles.summaryRow}><span>Subtotal:</span><span>₹{order.subtotal}</span></div>
+                                <div className={styles.summaryRow}><span>Discount:</span><span>-₹{order.discount || 0}</span></div>
+                                <div className={styles.summaryRow}><span>Shipping:</span><span>₹{order.shipping_charge || 0}</span></div>
+                                <div className={`${styles.summaryRow} ${styles.finalTotal}`}><span>Total:</span><span>₹{order.total}</span></div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.emptyCard}>
+                    <FiPackage />
+                    <p>{ordersLoading ? 'Loading your orders...' : "You haven't placed any orders yet."}</p>
+                    {!ordersLoading && <Link to="/products" className="btn btn-primary">Start Gifting</Link>}
+                  </div>
+                )}
               </div>
             )}
 
@@ -125,14 +238,7 @@ const Profile = () => {
 
             {activeTab === 'settings' && (
               <div className={styles.card}>
-                <h3>Security & Privacy</h3>
-                <div className={styles.settingItem}>
-                  <div>
-                    <strong>Two-Factor Authentication</strong>
-                    <p>Add an extra layer of security to your account.</p>
-                  </div>
-                  <button className="btn btn-ghost">Enable</button>
-                </div>
+                <h3>Notification Preferences</h3>
                 <div className={styles.settingItem}>
                   <div>
                     <strong>Marketing Emails</strong>
@@ -140,12 +246,17 @@ const Profile = () => {
                   </div>
                   <input type="checkbox" defaultChecked />
                 </div>
-                <div className={`${styles.settingItem} ${styles.danger}`}>
+                <div className={styles.settingItem}>
                   <div>
-                    <strong>Delete Account</strong>
-                    <p>Permanently remove your account and all data.</p>
+                    <strong>Order Updates</strong>
+                    <p>Get real-time tracking and status notifications via WhatsApp.</p>
                   </div>
-                  <button className="btn btn-secondary">Delete</button>
+                  <input type="checkbox" defaultChecked />
+                </div>
+                <div style={{ marginTop: '40px', padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <p style={{ color: '#64748b', fontSize: '0.85rem', textAlign: 'center' }}>
+                    Need to change your password or secure your account? Contact support at support@gokugifts.com
+                  </p>
                 </div>
               </div>
             )}

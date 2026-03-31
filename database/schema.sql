@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR(20),
   role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin', 'vendor')),
   avatar TEXT,
+  review_count INTEGER DEFAULT 0 CHECK (review_count >= 0),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS products (
   relationship_tags TEXT[],
   images JSONB,
   features TEXT[],
+  details TEXT,
   product_code VARCHAR(50) UNIQUE,
   gift_type VARCHAR(50) DEFAULT 'Standard',
   personalization_options JSONB,
@@ -115,10 +117,31 @@ CREATE TABLE IF NOT EXISTS product_variants (
   discount_percentage DECIMAL(5, 2) DEFAULT 0 CHECK (discount_percentage BETWEEN 0 AND 100),
   discounted_price DECIMAL(10, 2) GENERATED ALWAYS AS (price - (price * discount_percentage / 100)) STORED,
   stock INTEGER DEFAULT 0 CHECK (stock >= 0),
+  description TEXT,
+  features TEXT[],
   image TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(product_id, variant_name)
 );
 
 CREATE INDEX IF NOT EXISTS idx_variant_product_id ON product_variants(product_id);
+
+-- 1. Add missing columns to Products table
+ALTER TABLE products 
+ADD COLUMN IF NOT EXISTS product_code VARCHAR(50) UNIQUE,
+ADD COLUMN IF NOT EXISTS gift_type VARCHAR(50) DEFAULT 'Standard',
+ADD COLUMN IF NOT EXISTS personalization_options JSONB;
+
+-- 2. Convert images column from TEXT[] to JSONB (if it's not already JSONB)
+-- This is necessary for the new Image ID tracking system
+DO $$ 
+BEGIN 
+    IF (SELECT data_type FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'images') = 'ARRAY' THEN
+        ALTER TABLE products ALTER COLUMN images TYPE JSONB USING to_jsonb(images);
+    END IF;
+END $$;
+
+-- 3. Add missing column to Orders table
+ALTER TABLE orders 
+ADD COLUMN IF NOT EXISTS order_code VARCHAR(50) UNIQUE;
 

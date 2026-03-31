@@ -86,7 +86,7 @@ exports.createProduct = async (req, res) => {
   try {
     const {
       name, description, price, originalPrice, category, occasion, relationship_tags,
-      customizable, stock, features, product_code, gift_type, personalization_options
+      customizable, stock, features, product_code, gift_type, personalization_options, details
     } = req.body;
 
     let existingImages = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
@@ -137,7 +137,8 @@ exports.createProduct = async (req, res) => {
         customizable: customizable === 'true' || customizable === true, 
         stock: parseInt(stock) || 0, 
         images: imageObjects, 
-        features: features ? (Array.isArray(features) ? features : [features]) : [],
+        features: features ? (typeof features === 'string' ? JSON.parse(features) : (Array.isArray(features) ? features : [features])) : [],
+        details: details || null,
         created_by: req.user.id
       }])
       .select()
@@ -174,6 +175,8 @@ exports.createProduct = async (req, res) => {
             price: parseFloat(v.price) || 0,
             discount_percentage: parseFloat(v.discountPercentage || 0),
             stock: parseInt(v.stock) || 0,
+            description: v.description || null,
+            features: v.features ? (typeof v.features === 'string' ? v.features.split(',').map(f => f.trim()) : v.features) : [],
             image: vImageUrl
           });
         }
@@ -201,7 +204,7 @@ exports.updateProduct = async (req, res) => {
   try {
     const {
       name, description, price, originalPrice, category, occasion, 
-      relationship_tags, customizable, stock, features, product_code, gift_type, personalization_options
+      relationship_tags, customizable, stock, features, product_code, gift_type, personalization_options, details
     } = req.body;
 
     let existingImages = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
@@ -253,7 +256,8 @@ exports.updateProduct = async (req, res) => {
         customizable: customizable !== undefined ? (customizable === 'true' || customizable === true) : undefined, 
         stock: stock ? parseInt(stock) : undefined, 
         images: imageObjects.length > 0 ? imageObjects : undefined, 
-        features: features ? (Array.isArray(features) ? features : [features]) : undefined
+        features: features ? (typeof features === 'string' ? JSON.parse(features) : (Array.isArray(features) ? features : [features])) : undefined,
+        details: details !== undefined ? details : undefined
       })
       .eq('id', req.params.id)
       .select()
@@ -290,6 +294,8 @@ exports.updateProduct = async (req, res) => {
               price: parseFloat(v.price) || 0,
               discount_percentage: parseFloat(v.discountPercentage || 0),
               stock: parseInt(v.stock) || 0,
+              description: v.description || null,
+              features: v.features ? (typeof v.features === 'string' ? v.features.split(',').map(f => f.trim()) : v.features) : [],
               image: vImageUrl
             });
           }

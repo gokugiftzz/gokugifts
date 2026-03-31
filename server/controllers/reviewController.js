@@ -38,6 +38,17 @@ exports.addReview = async (req, res) => {
       .update({ rating: avgRating.toFixed(1), review_count: reviews.length })
       .eq('id', req.params.productId);
 
+    // Update user's total review count
+    const { count: userReviewCount } = await supabase
+      .from('reviews')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', req.user.id);
+    
+    await supabase
+      .from('users')
+      .update({ review_count: userReviewCount })
+      .eq('id', req.user.id);
+
     res.status(201).json({ success: true, review });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
