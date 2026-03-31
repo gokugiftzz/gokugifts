@@ -19,7 +19,6 @@ const ProductDetail = () => {
   const [customText, setCustomText] = useState('');
   const [customImage, setCustomImage] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedVariant, setSelectedVariant] = useState(null);
   const fileRef = useRef();
   const { addToCart } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
@@ -29,14 +28,7 @@ const ProductDetail = () => {
       setLoading(true);
       try {
         const res = await getProduct(id);
-        const fetchedProduct = res.data.product;
-        setProduct(fetchedProduct);
-        
-        // Auto-select first variant if available
-        if (fetchedProduct.product_variants && fetchedProduct.product_variants.length > 0) {
-          setSelectedVariant(fetchedProduct.product_variants[0]);
-        }
-        
+        setProduct(res.data.product);
         const rev = await getReviews(id);
         setReviews(rev.data.reviews || []);
       } catch {
@@ -57,22 +49,9 @@ const ProductDetail = () => {
     const customization = product?.customizable && (customText || customImage)
       ? { text: customText, image: customImage }
       : null;
-    
-    // Create a product object that includes variant info if selected
-    const productToAdd = selectedVariant 
-      ? { 
-          ...product, 
-          price: selectedVariant.discounted_price || selectedVariant.price,
-          original_price: selectedVariant.price,
-          variantId: selectedVariant.id,
-          variantName: selectedVariant.variant_name,
-          sku: selectedVariant.sku,
-          image: getImageUrl(selectedVariant.image || product.images?.[0])
-        }
-      : product;
 
-    for (let i = 0; i < quantity; i++) addToCart(productToAdd, 1, customization);
-    toast.success(`Added ${quantity}x ${product.name}${selectedVariant ? ` (${selectedVariant.variant_name})` : ''} to cart!`);
+    for (let i = 0; i < quantity; i++) addToCart(product, 1, customization);
+    toast.success(`Added ${quantity}x ${product.name} to cart!`);
   };
 
   if (loading) return (
@@ -98,33 +77,6 @@ const ProductDetail = () => {
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
-  // Combine main product images with variant images
-  const allImages = [...(product.images || [])];
-  product.product_variants?.forEach(v => {
-    if (v.image && !allImages.includes(v.image)) {
-      allImages.push(v.image);
-    }
-  });
-
-  const handleThumbnailClick = (img, index) => {
-    setSelectedImage(index);
-    // Find if this image belongs to a variant
-    const matchingVariant = product.product_variants?.find(v => v.image === img);
-    if (matchingVariant) {
-      setSelectedVariant(matchingVariant);
-    }
-  };
-
-  const handleVariantSelect = (variant) => {
-    setSelectedVariant(variant);
-    if (variant.image) {
-      const imgIndex = allImages.indexOf(variant.image);
-      if (imgIndex !== -1) {
-        setSelectedImage(imgIndex);
-      }
-    }
-  };
-
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -142,19 +94,15 @@ const ProductDetail = () => {
           <div className={styles.imageSection}>
             <div className={styles.mainImage}>
               <img
-                src={getImageUrl(allImages[selectedImage] || allImages[0])}
+                src={getImageUrl(product.images?.[selectedImage] || product.images?.[0])}
                 alt={product.name}
               />
               {discount > 0 && <span className={styles.discountLabel}>-{discount}%</span>}
             </div>
-            {allImages.length > 1 && (
+            {product.images?.length > 1 && (
               <div className={styles.thumbnails}>
-                {allImages.map((img, i) => (
-                  <button 
-                    key={i} 
-                    className={`${styles.thumb} ${i === selectedImage ? styles.thumbActive : ''}`} 
-                    onClick={() => handleThumbnailClick(img, i)}
-                  >
+                {product.images.map((img, i) => (
+                  <button key={i} className={`${styles.thumb} ${i === selectedImage ? styles.thumbActive : ''}`} onClick={() => setSelectedImage(i)}>
                     <img src={getImageUrl(img)} alt={`View ${i+1}`} />
                   </button>
                 ))}
@@ -166,7 +114,7 @@ const ProductDetail = () => {
           <div className={styles.details}>
             <div className={styles.category}>{product.category}</div>
             <h1 className={styles.name}>{product.name}</h1>
-            <div className={styles.productCode}>SKU: {selectedVariant ? selectedVariant.sku : product.product_code}</div>
+            <div className={styles.productCode}>SKU: {product.product_code}</div>
 
             {/* Rating */}
             <div className={styles.ratingRow}>
@@ -181,46 +129,17 @@ const ProductDetail = () => {
 
             {/* Price */}
             <div className={styles.priceSection}>
-              <span className={styles.price}>
-                ₹{(selectedVariant ? (selectedVariant.discounted_price || selectedVariant.price) : product.price)?.toLocaleString()}
-              </span>
-              {(selectedVariant ? selectedVariant.price > (selectedVariant.discounted_price || selectedVariant.price) : product.original_price) && (
-                <span className={styles.originalPrice}>
-                  ₹{(selectedVariant ? selectedVariant.price : product.original_price)?.toLocaleString()}
-                </span>
+              <span className={styles.price}>₹{product.price?.toLocaleString()}</span>
+              {product.original_price && (
+                <span className={styles.originalPrice}>₹{product.original_price?.toLocaleString()}</span>
               )}
-              {(selectedVariant ? selectedVariant.discount_percentage > 0 : discount > 0) && (
-                <span className={styles.discountPct}>
-                  {selectedVariant ? Math.round(selectedVariant.discount_percentage) : discount}% OFF
-                </span>
-              )}
+              {discount > 0 && <span className={styles.discountPct}>{discount}% OFF</span>}
             </div>
 
-            {/* Variants Selection */}
-            {product.product_variants && product.product_variants.length > 0 && (
-              <div className={styles.variantSection}>
-                <h3 className={styles.variantTitle}>Choose Variant</h3>
-                <div className={styles.variantList}>
-                  {product.product_variants.map(variant => (
-                    <button
-                      key={variant.id}
-                      className={`${styles.variantBtn} ${selectedVariant?.id === variant.id ? styles.variantActive : ''}`}
-                      onClick={() => handleVariantSelect(variant)}
-                    >
-                      {variant.variant_name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Features Preview */}
-            {(selectedVariant?.features || product.features) && (
+            {product.features && (
               <div className={styles.featuresPreview}>
-                {(typeof (selectedVariant?.features || product.features) === 'string' 
-                  ? (selectedVariant?.features || product.features).split(',') 
-                  : (selectedVariant?.features || product.features)
-                ).slice(0, 3).map(f => (
+                {(typeof product.features === 'string' ? product.features.split(',') : product.features).slice(0, 3).map(f => (
                   <div key={f} className={styles.feature}><FiCheck className={styles.checkIcon} />{f}</div>
                 ))}
               </div>
@@ -284,10 +203,10 @@ const ProductDetail = () => {
             <div className={styles.quantitySection}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className={styles.qtyLabel}>Quantity</span>
-                {(selectedVariant ? selectedVariant.stock : product.stock) <= 5 && (selectedVariant ? selectedVariant.stock : product.stock) > 0 && (
-                  <span style={{ color: '#ff6b6b', fontSize: '0.8rem', fontWeight: 600 }}>🔥 Only {(selectedVariant ? selectedVariant.stock : product.stock)} left!</span>
+                {product.stock <= 5 && product.stock > 0 && (
+                  <span style={{ color: '#ff6b6b', fontSize: '0.8rem', fontWeight: 600 }}>🔥 Only {product.stock} left!</span>
                 )}
-                {(selectedVariant ? selectedVariant.stock : product.stock) <= 0 && (
+                {product.stock <= 0 && (
                   <span style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 600 }}>🚫 Out of Stock</span>
                 )}
               </div>
@@ -295,15 +214,15 @@ const ProductDetail = () => {
                 <button 
                   className={styles.qtyBtn} 
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  disabled={(selectedVariant ? selectedVariant.stock : product.stock) <= 0}
+                  disabled={product.stock <= 0}
                 >
                   <FiMinus />
                 </button>
-                <span className={styles.qtyValue}>{(selectedVariant ? selectedVariant.stock : product.stock) <= 0 ? 0 : quantity}</span>
+                <span className={styles.qtyValue}>{product.stock <= 0 ? 0 : quantity}</span>
                 <button 
                   className={styles.qtyBtn} 
-                  onClick={() => setQuantity(q => Math.min((selectedVariant ? selectedVariant.stock : product.stock), q + 1))}
-                  disabled={quantity >= (selectedVariant ? selectedVariant.stock : product.stock) || (selectedVariant ? selectedVariant.stock : product.stock) <= 0}
+                  onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
+                  disabled={quantity >= product.stock || product.stock <= 0}
                 >
                   <FiPlus />
                 </button>
@@ -356,15 +275,12 @@ const ProductDetail = () => {
           <div className={styles.tabContent}>
             {activeTab === 'description' && (
               <div className={styles.description}>
-                <p>{selectedVariant?.description || product.details || product.description}</p>
+                <p>{product.details || product.description}</p>
               </div>
             )}
             {activeTab === 'features' && (
               <div className={styles.featureList}>
-                {(typeof (selectedVariant?.features || product.features) === 'string' 
-                  ? (selectedVariant?.features || product.features).split(',') 
-                  : (selectedVariant?.features || product.features)
-                )?.map(f => (
+                {(typeof product.features === 'string' ? product.features.split(',') : product.features)?.map(f => (
                   <div key={f} className={styles.featureItem}><FiCheck className={styles.checkIcon} />{f}</div>
                 ))}
               </div>
