@@ -86,24 +86,47 @@ exports.createProduct = async (req, res) => {
   try {
     const {
       name, description, price, originalPrice, category, occasion, relationship_tags,
-      customizable, stock, features
+      customizable, stock, features, product_code, gift_type, personalization_options
     } = req.body;
 
-    let imageUrls = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
+    let existingImages = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
+    
+    // Parse existing images if they come as stringified JSON
+    let imageObjects = [];
+    for (let img of existingImages) {
+      if (typeof img === 'string' && img.startsWith('{')) {
+        try { imageObjects.push(JSON.parse(img)); } catch (e) {}
+      } else if (typeof img === 'object') {
+        imageObjects.push(img);
+      } else if (typeof img === 'string') {
+        imageObjects.push({ imgId: 'IMG-' + Math.floor(1000 + Math.random() * 9000), url: img });
+      }
+    }
 
     // 1️⃣ Handle Multiple Main Product Images (fieldname: images)
     if (req.files && req.files.length > 0) {
       const mainImageFiles = req.files.filter(f => f.fieldname === 'images');
       for (const file of mainImageFiles) {
         const url = await uploadSupabaseFile(file);
-        if (url) imageUrls.push(url);
+        if (url) {
+          imageObjects.push({
+            imgId: 'IMG-' + Math.floor(10000 + Math.random() * 90000),
+            url: url
+          });
+        }
       }
     }
 
+    const pCode = product_code || ('GFT-' + Math.floor(1000 + Math.random() * 9000));
+    const persOptions = typeof personalization_options === 'string' ? JSON.parse(personalization_options || '{}') : (personalization_options || {});
+    
     // 3️⃣ Save Product to Database
     const { data: product, error } = await supabase
       .from('products')
       .insert([{
+        product_code: pCode,
+        gift_type: gift_type || 'Standard',
+        personalization_options: persOptions,
         name, 
         description, 
         price: parseFloat(price) || 0, 
@@ -113,7 +136,7 @@ exports.createProduct = async (req, res) => {
         relationship_tags: relationship_tags ? (Array.isArray(relationship_tags) ? relationship_tags : [relationship_tags]) : [], 
         customizable: customizable === 'true' || customizable === true, 
         stock: parseInt(stock) || 0, 
-        images: imageUrls, 
+        images: imageObjects, 
         features: features ? (Array.isArray(features) ? features : [features]) : [],
         created_by: req.user.id
       }])
@@ -178,24 +201,48 @@ exports.updateProduct = async (req, res) => {
   try {
     const {
       name, description, price, originalPrice, category, occasion, 
-      relationship_tags, customizable, stock, features
+      relationship_tags, customizable, stock, features, product_code, gift_type, personalization_options
     } = req.body;
 
-    let imageUrls = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
+    let existingImages = req.body.images ? (Array.isArray(req.body.images) ? req.body.images : [req.body.images]) : [];
+    
+    // Parse existing images if they come as stringified JSON
+    let imageObjects = [];
+    for (let img of existingImages) {
+      if (typeof img === 'string' && img.startsWith('{')) {
+        try { imageObjects.push(JSON.parse(img)); } catch (e) {}
+      } else if (typeof img === 'object') {
+        imageObjects.push(img);
+      } else if (typeof img === 'string') {
+        imageObjects.push({ imgId: 'IMG-' + Math.floor(1000 + Math.random() * 9000), url: img });
+      }
+    }
 
     // 1️⃣ Handle New Image Upload if provided
     if (req.files && req.files.length > 0) {
       const mainImageFiles = req.files.filter(f => f.fieldname === 'images');
       for (const file of mainImageFiles) {
         const url = await uploadSupabaseFile(file);
-        if (url) imageUrls.push(url);
+        if (url) {
+          imageObjects.push({
+            imgId: 'IMG-' + Math.floor(10000 + Math.random() * 90000),
+            url: url
+          });
+        }
       }
     }
+
+    const persOptions = personalization_options !== undefined 
+      ? (typeof personalization_options === 'string' ? JSON.parse(personalization_options || '{}') : personalization_options)
+      : undefined;
 
     // 2️⃣ Update Product in Database
     const { data: product, error } = await supabase
       .from('products')
       .update({
+        product_code: product_code ? product_code : undefined,
+        gift_type: gift_type ? gift_type : undefined,
+        personalization_options: persOptions,
         name, 
         description, 
         price: price ? parseFloat(price) : undefined, 
@@ -205,7 +252,7 @@ exports.updateProduct = async (req, res) => {
         relationship_tags: relationship_tags ? (Array.isArray(relationship_tags) ? relationship_tags : [relationship_tags]) : undefined, 
         customizable: customizable !== undefined ? (customizable === 'true' || customizable === true) : undefined, 
         stock: stock ? parseInt(stock) : undefined, 
-        images: imageUrls.length > 0 ? imageUrls : undefined, 
+        images: imageObjects.length > 0 ? imageObjects : undefined, 
         features: features ? (Array.isArray(features) ? features : [features]) : undefined
       })
       .eq('id', req.params.id)

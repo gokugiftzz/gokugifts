@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiTrash2, FiEdit2, FiEye, FiDownload, FiSearch, FiAlertTriangle, FiX, FiImage } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiEdit2, FiEye, FiDownload, FiSearch, FiAlertTriangle, FiX, FiImage, FiSettings } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import styles from './AdminProducts.module.css';
 import { getProducts, deleteAllProducts, deleteProduct, createProduct, updateProduct } from '../../utils/api';
@@ -15,14 +15,21 @@ const AdminProducts = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const initialProductState = {
+    product_code: '',
     name: '',
     description: '',
     price: '',
     originalPrice: '',
-    category: 'Gifts',
+    category: 'Toys',
     stock: 10,
     customizable: false,
     productType: 'single', // 'single' | 'variable'
+    gift_type: 'Standard', // Standard | Combo | Personalized
+    personalization_options: {
+      namePrint: false,
+      photoUpload: false,
+      customMessage: false
+    },
     imageFiles: [], 
     existingImages: [],
     variants: [] 
@@ -95,7 +102,12 @@ const AdminProducts = () => {
     setEditingProductId(product.id);
     const hasVariants = product.product_variants && product.product_variants.length > 0;
     
+    // Process existing images to stringify for API but keep structure if objects
+    const existingImagesList = product.images || [];
+    const previewUrls = existingImagesList.map(img => typeof img === 'object' ? img.url : img);
+
     setNewProduct({
+      product_code: product.product_code || '',
       name: product.name,
       description: product.description || '',
       price: product.price,
@@ -104,17 +116,26 @@ const AdminProducts = () => {
       stock: product.stock,
       customizable: product.customizable || false,
       productType: hasVariants ? 'variable' : 'single',
+      gift_type: product.gift_type || 'Standard',
+      personalization_options: product.personalization_options || { namePrint: false, photoUpload: false, customMessage: false },
       imageFiles: [],
-      existingImages: product.images || [],
+      existingImages: existingImagesList,
       variants: hasVariants ? product.product_variants.map(v => ({
-        ...v, 
-        variantName: v.variant_name, 
-        discountPercentage: v.discount_percentage,
-        imagePreview: v.image
+         ...v, 
+         variantName: v.variant_name, 
+         discountPercentage: v.discount_percentage,
+         imagePreview: v.image
       })) : []
     });
-    setPreviews(product.images || []);
+    setPreviews(previewUrls);
     setShowModal(true);
+  };
+
+  const generateProductCode = () => {
+    setNewProduct({
+      ...newProduct,
+      product_code: 'GFT-' + Math.floor(1000 + Math.random() * 9000)
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -127,6 +148,9 @@ const AdminProducts = () => {
     setIsSubmitting(true);
     try {
       const formData = new FormData();
+      if (newProduct.product_code) formData.append('product_code', newProduct.product_code);
+      formData.append('gift_type', newProduct.gift_type);
+      formData.append('personalization_options', JSON.stringify(newProduct.personalization_options));
       formData.append('name', newProduct.name);
       formData.append('description', newProduct.description);
       formData.append('price', parseFloat(newProduct.price));
@@ -139,19 +163,20 @@ const AdminProducts = () => {
       if (newProduct.imageFiles.length > 0) {
         newProduct.imageFiles.forEach(file => formData.append('images', file));
       } else if (newProduct.existingImages.length > 0) {
-        newProduct.existingImages.forEach(url => formData.append('images', url));
+        newProduct.existingImages.forEach(img => {
+          // If the image is a structured object, stringify it so backend can parse
+          formData.append('images', typeof img === 'object' ? JSON.stringify(img) : img);
+        });
       }
 
       // Variants
       if (newProduct.productType === 'variable' && newProduct.variants.length > 0) {
-        // Exclude imageFile object from JSON string
         const cleanVariants = newProduct.variants.map(v => {
           const { imageFile, imagePreview, ...rest } = v;
           return rest;
         });
         formData.append('variants', JSON.stringify(cleanVariants));
         
-        // Append variant image files
         newProduct.variants.forEach((v, index) => {
           if (v.imageFile) {
             formData.append(`variantImage_${index}`, v.imageFile);
@@ -204,6 +229,13 @@ const AdminProducts = () => {
     });
   };
 
+  // Helper to extract first image URL gracefully
+  const getProductImageUrl = (product) => {
+    if (!product.images || product.images.length === 0) return 'https://via.placeholder.com/100?text=🎁';
+    const firstImg = product.images[0];
+    return typeof firstImg === 'object' ? firstImg.url : firstImg;
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -215,7 +247,10 @@ const AdminProducts = () => {
           <button className={`btn btn-secondary ${styles.eraseAllBtn}`} onClick={handleEraseAll}>
             <FiTrash2 /> Erase All
           </button>
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <button className="btn btn-primary" onClick={() => {
+            setNewProduct({...initialProductState, product_code: 'GFT-' + Math.floor(1000 + Math.random() * 9000)});
+            setShowModal(true);
+          }}>
             <FiPlus /> Add New Product
           </button>
         </div>
@@ -237,10 +272,10 @@ const AdminProducts = () => {
               <tr key={product.id}>
                 <td>
                   <div className={styles.productCell}>
-                    <img src={product.images?.[0] || 'https://via.placeholder.com/100?text=🎁'} alt="" className={styles.productImg} />
+                    <img src={getProductImageUrl(product)} alt="" className={styles.productImg} />
                     <div className={styles.productInfo}>
                       <strong>{product.name}</strong>
-                      <span title={product.id}>ID: {product.id.substring(0,8)}...</span>
+                      <span title={product.id}>SKU: {product.product_code || 'N/A'} • {product.gift_type || 'Standard'}</span>
                       {product.product_variants?.length > 0 && <span className={styles.variantBadge}>{product.product_variants.length} Variants</span>}
                     </div>
                   </div>
@@ -296,44 +331,106 @@ const AdminProducts = () => {
               </div>
 
               <div className={styles.formGrid}>
+                {/* Product Code */}
+                <div className={styles.formGroup} style={{ gridColumn: '1 / -1' }}>
+                  <label>Product Code (SKU - Unique ID)</label>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <input type="text" className="input" required value={newProduct.product_code} onChange={e => setNewProduct({...newProduct, product_code: e.target.value})} placeholder="e.g. GFT-1001" style={{ flex: 1, padding: '10px' }} />
+                    <button type="button" onClick={generateProductCode} className="btn btn-secondary" style={{ padding: '0 15px' }}>Generate</button>
+                  </div>
+                </div>
+
                 <div className={styles.formGroup}>
                   <label>Product Name</label>
                   <input type="text" className="input" required value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} placeholder="e.g. Magic Mug" />
                 </div>
+                
                 <div className={styles.formGroup}>
                   <label>Category</label>
-                  <input type="text" className="input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} placeholder="e.g. Birthday, Home Decor" required />
+                  <select className="input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} required>
+                    <option value="Toys">Toys</option>
+                    <option value="Combos">Combos</option>
+                    <option value="Personalized Gifts">Personalized Gifts</option>
+                    <option value="Kids Gifts">Kids Gifts</option>
+                    <option value="Festival Gifts">Festival Gifts</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
+
+                <div className={styles.formGroup}>
+                  <label>Gift Type</label>
+                  <select className="input" value={newProduct.gift_type} onChange={e => setNewProduct({...newProduct, gift_type: e.target.value})} required>
+                    <option value="Standard">Standard</option>
+                    <option value="Combo">Combo</option>
+                    <option value="Personalized">Personalized</option>
+                  </select>
+                </div>
+
                 <div className={styles.formGroup}>
                   <label>Base Price (₹)</label>
                   <input type="number" className="input" required value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} />
                 </div>
+                
                 <div className={styles.formGroup}>
                   <label>Original Price (₹ Optional)</label>
                   <input type="number" className="input" value={newProduct.originalPrice} onChange={e => setNewProduct({...newProduct, originalPrice: e.target.value})} />
                 </div>
+                
                 <div className={styles.formGroup}>
                   <label>Overall Stock</label>
                   <input type="number" className="input" required value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: e.target.value})} />
                 </div>
-                <div className={styles.formGroup}>
-                  <label>Customizable?</label>
-                  <div className={styles.checkboxWrapper}>
-                    <input type="checkbox" id="customizable" checked={newProduct.customizable} onChange={e => setNewProduct({...newProduct, customizable: e.target.checked})} />
-                    <label htmlFor="customizable">Allow user texts/photos</label>
-                  </div>
+              </div>
+
+              {/* Personalization Options */}
+              <div className={styles.formGroup} style={{ marginTop: 20, padding: 15, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                <label style={{ fontSize: '1rem', color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <FiSettings /> Personalization Settings
+                </label>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                  <label className={styles.checkboxWrapper} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={newProduct.personalization_options?.namePrint || false} 
+                      onChange={e => setNewProduct({...newProduct, personalization_options: {...newProduct.personalization_options, namePrint: e.target.checked}})} 
+                    />
+                    <span>Name Print</span>
+                  </label>
+                  <label className={styles.checkboxWrapper} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={newProduct.personalization_options?.photoUpload || false} 
+                      onChange={e => setNewProduct({...newProduct, personalization_options: {...newProduct.personalization_options, photoUpload: e.target.checked}})} 
+                    />
+                    <span>Photo Upload</span>
+                  </label>
+                  <label className={styles.checkboxWrapper} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={newProduct.personalization_options?.customMessage || false} 
+                      onChange={e => setNewProduct({...newProduct, personalization_options: {...newProduct.personalization_options, customMessage: e.target.checked}})} 
+                    />
+                    <span>Custom Message</span>
+                  </label>
                 </div>
               </div>
 
               {/* Main Images */}
               <div className={styles.formGroup} style={{ marginTop: 20 }}>
                 <label>Main Product Images (Multiple allowed)</label>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 10px 0' }}>Images will automatically be assigned unique IDs upon upload (e.g. IMG-5001).</p>
                 <input type="file" accept="image/*" multiple className="input" onChange={handleMainFileChange} />
                 {previews.length > 0 && (
                   <div className={styles.previewGrid}>
-                    {previews.map((src, i) => (
-                      <img key={i} src={src} alt={`Preview ${i}`} className={styles.previewImg} />
-                    ))}
+                    {previews.map((src, i) => {
+                      const imgObj = newProduct.existingImages[i];
+                      const imgId = typeof imgObj === 'object' && imgObj?.imgId ? imgObj.imgId : null;
+                      return (
+                      <div key={i} style={{position: 'relative'}}>
+                        <img src={src} alt={`Preview ${i}`} className={styles.previewImg} style={{width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px'}} />
+                        {imgId && <span style={{position:'absolute', bottom: 5, left: 5, background: 'rgba(0,0,0,0.7)', color:'white', fontSize:'0.7rem', padding:'2px 6px', borderRadius: 4}}>{imgId}</span>}
+                      </div>
+                    )})}
                   </div>
                 )}
               </div>

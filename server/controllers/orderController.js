@@ -45,10 +45,13 @@ exports.createOrder = async (req, res) => {
     const shipping = subtotal > 999 ? 0 : 99;
     const total = subtotal - discount + shipping;
 
+    const orderCode = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+
     // 3️⃣ Save Order
     const { data: order, error } = await supabase
       .from('orders')
       .insert([{
+        order_code: orderCode,
         user_id: req.user.id,
         items,
         shipping_address: shippingAddress,

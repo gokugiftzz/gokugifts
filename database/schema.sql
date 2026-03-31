@@ -41,8 +41,11 @@ CREATE TABLE IF NOT EXISTS products (
   category VARCHAR(100),
   occasion VARCHAR(100),
   relationship_tags TEXT[],
-  images TEXT[],
+  images JSONB,
   features TEXT[],
+  product_code VARCHAR(50) UNIQUE,
+  gift_type VARCHAR(50) DEFAULT 'Standard',
+  personalization_options JSONB,
   customizable BOOLEAN DEFAULT false,
   stock INTEGER DEFAULT 0 CHECK (stock >= 0),
   rating DECIMAL(3, 1) DEFAULT 0 CHECK (rating BETWEEN 0 AND 5),
@@ -59,6 +62,7 @@ CREATE INDEX IF NOT EXISTS idx_products_occasion ON products(occasion);
 -- 3. Orders Table
 CREATE TABLE IF NOT EXISTS orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_code VARCHAR(50) UNIQUE,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   items JSONB NOT NULL,
   shipping_address JSONB NOT NULL,
