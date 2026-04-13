@@ -11,11 +11,19 @@ exports.getAnalytics = async (req, res) => {
     const totalRevenue = revenueData?.reduce((sum, o) => sum + o.total, 0) || 0;
 
     // Recent orders
-    const { data: recentOrders } = await supabase
+    const { data: rawRecentOrders } = await supabase
       .from('orders')
-      .select('*, user:users(name, email)')
+      .select('*')
       .order('created_at', { ascending: false })
       .limit(10);
+      
+    let recentOrders = rawRecentOrders || [];
+    if (recentOrders.length > 0) {
+      const userIds = [...new Set(recentOrders.map(o => o.user_id))].filter(Boolean);
+      const { data: users } = await supabase.from('users').select('id, name, email').in('id', userIds);
+      const userMap = (users || []).reduce((acc, user) => ({ ...acc, [user.id]: user }), {});
+      recentOrders = recentOrders.map(o => ({ ...o, user: userMap[o.user_id] || null }));
+    }
 
     // Sales by category
     const { data: allOrders } = await supabase.from('orders').select('items, total');

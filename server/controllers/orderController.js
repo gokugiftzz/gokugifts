@@ -185,10 +185,28 @@ exports.getAllOrders = async (req, res) => {
   try {
     const { data: orders, error } = await supabase
       .from('orders')
-      .select('*, user:users(name, email)')
+      .select('*')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    res.json({ success: true, orders });
+
+    // Manually join user data since FK constraints are dropped
+    const userIds = [...new Set(orders.map(o => o.user_id))].filter(Boolean);
+    const { data: users } = await supabase
+      .from('users')
+      .select('id, name, email')
+      .in('id', userIds);
+
+    const userMap = (users || []).reduce((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+
+    const enrichedOrders = orders.map(order => ({
+      ...order,
+      user: userMap[order.user_id] || null
+    }));
+
+    res.json({ success: true, orders: enrichedOrders });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
