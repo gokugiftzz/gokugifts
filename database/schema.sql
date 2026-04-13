@@ -404,6 +404,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Allow anyone to read product images
 DROP POLICY IF EXISTS "products_storage_public_read"  ON storage.objects;
 DROP POLICY IF EXISTS "products_storage_admin_upload" ON storage.objects;
+DROP POLICY IF EXISTS "products_storage_admin_delete" ON storage.objects;
 
 CREATE POLICY "products_storage_public_read" ON storage.objects
   FOR SELECT USING (bucket_id = 'products');

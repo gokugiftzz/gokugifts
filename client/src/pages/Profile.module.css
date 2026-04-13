@@ -125,6 +125,7 @@
   border: 1px solid #f1f5f9;
   position: sticky;
   top: 120px;
+  align-self: start;
 }
 
 .navBtn {
