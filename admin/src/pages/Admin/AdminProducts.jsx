@@ -24,7 +24,7 @@ const AdminProducts = () => {
     description: '',
     price: '',
     originalPrice: '',
-    category: 'Toys',
+    category: 'Frames',
     stock: 10,
     customizable: false,
     productType: 'single', // 'single' | 'variable'
@@ -409,12 +409,12 @@ const AdminProducts = () => {
                 <div className={styles.formGroup}>
                   <label>Category</label>
                   <select className="input" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} required>
+                    <option value="Frames">Frames</option>
+                    <option value="Polaroids">Polaroids</option>
+                    <option value="Hair Accessories">Hair Accessories</option>
+                    <option value="Hampers">Hampers</option>
                     <option value="Toys">Toys</option>
-                    <option value="Combos">Combos</option>
-                    <option value="Personalized Gifts">Personalized Gifts</option>
-                    <option value="Kids Gifts">Kids Gifts</option>
-                    <option value="Festival Gifts">Festival Gifts</option>
-                    <option value="Other">Other</option>
+                    <option value="Anti-Tarnish Jewels">Anti-Tarnish Jewels</option>
                   </select>
                 </div>
 

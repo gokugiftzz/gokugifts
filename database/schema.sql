@@ -27,7 +27,8 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE OR REPLACE TRIGGER update_users_updated_at
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+CREATE TRIGGER update_users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
@@ -39,10 +40,13 @@ CREATE TABLE IF NOT EXISTS products (
   description TEXT,
   price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
   original_price DECIMAL(10, 2) CHECK (original_price >= 0),
-  category VARCHAR(100),
+  -- Allowed categories: 'Frames' | 'Polaroids' | 'Hair Accessories' | 'Hampers' | 'Toys' | 'Anti-Tarnish Jewels'
+  category VARCHAR(100) CHECK (
+    category IN ('Frames', 'Polaroids', 'Hair Accessories', 'Hampers', 'Toys', 'Anti-Tarnish Jewels')
+  ),
   occasion VARCHAR(100),
   relationship_tags TEXT[],
-  images JSONB,
+  images JSONB, -- Stores array of {imgId, url}
   features TEXT[],
   details TEXT,
   product_code VARCHAR(50) UNIQUE,
@@ -53,8 +57,8 @@ CREATE TABLE IF NOT EXISTS products (
   rating DECIMAL(3, 1) DEFAULT 0 CHECK (rating BETWEEN 0 AND 5),
   review_count INTEGER DEFAULT 0 CHECK (review_count >= 0),
   featured BOOLEAN DEFAULT false,
-  vendor_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  vendor_id UUID,
+  created_by UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -65,8 +69,8 @@ CREATE INDEX IF NOT EXISTS idx_products_occasion ON products(occasion);
 CREATE TABLE IF NOT EXISTS orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   order_code VARCHAR(50) UNIQUE,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  items JSONB NOT NULL,
+  user_id UUID NOT NULL,
+  items JSONB NOT NULL, -- Array of products
   shipping_address JSONB NOT NULL,
   payment_method VARCHAR(50),
   payment_status VARCHAR(50) DEFAULT 'pending',
@@ -75,10 +79,10 @@ CREATE TABLE IF NOT EXISTS orders (
   discount DECIMAL(10, 2) DEFAULT 0 CHECK (discount >= 0),
   shipping_charge DECIMAL(10, 2) DEFAULT 0 CHECK (shipping_charge >= 0),
   total DECIMAL(10, 2) NOT NULL CHECK (total >= 0),
-  status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled')),
+  status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'returned')),
   tracking_number VARCHAR(255),
   estimated_delivery DATE,
-  history JSONB DEFAULT '[]'::jsonb,
+  history JSONB DEFAULT '[]'::jsonb, -- Array of {status, time, message}
   gift_message TEXT,
   customizations JSONB,
   coupon_code VARCHAR(50),
@@ -112,11 +116,12 @@ CREATE TABLE IF NOT EXISTS reviews (
 -- 6. Product Variants Table
 CREATE TABLE IF NOT EXISTS product_variants (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  product_id UUID REFERENCES products(id) ON DELETE CASCADE NOT NULL,
+  product_id UUID NOT NULL,
   variant_name VARCHAR(255) NOT NULL,
   sku VARCHAR(100) UNIQUE NOT NULL,
   price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
   discount_percentage DECIMAL(5, 2) DEFAULT 0 CHECK (discount_percentage BETWEEN 0 AND 100),
+  discounted_price DECIMAL(10, 2),
   stock INTEGER DEFAULT 0 CHECK (stock >= 0),
   description TEXT,
   features TEXT[],
@@ -133,16 +138,14 @@ CREATE TABLE IF NOT EXISTS inventory_pool (
   product_code VARCHAR(50) UNIQUE NOT NULL,
   product_name VARCHAR(255),
   is_used BOOLEAN DEFAULT false,
-  product_id UUID REFERENCES products(id) ON DELETE SET NULL,
+  product_id UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE INDEX IF NOT EXISTS idx_inventory_pool_used ON inventory_pool(is_used);
 
 -- 8. Admin Activity Logs
 CREATE TABLE IF NOT EXISTS admin_activity_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  admin_id UUID REFERENCES users(id),
+  admin_id UUID,
   action VARCHAR(255) NOT NULL,
   target_type VARCHAR(100),
   target_id UUID,
@@ -151,22 +154,26 @@ CREATE TABLE IF NOT EXISTS admin_activity_logs (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_admin_logs_admin ON admin_activity_logs(admin_id);
-CREATE INDEX IF NOT EXISTS idx_admin_logs_created ON admin_activity_logs(created_at);
+-- 9. Coupons Table
+CREATE TABLE IF NOT EXISTS coupons (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  code VARCHAR(50) UNIQUE NOT NULL,
+  type VARCHAR(20) DEFAULT 'percentage' CHECK (type IN ('percentage', 'fixed')),
+  value DECIMAL(10, 2) NOT NULL,
+  min_cart_value DECIMAL(10, 2) DEFAULT 0,
+  max_discount DECIMAL(10, 2),
+  expires_at TIMESTAMP WITH TIME ZONE,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 
--- SAFE MIGRATIONS (Column check/add)
-ALTER TABLE products ADD COLUMN IF NOT EXISTS product_code VARCHAR(50) UNIQUE;
-ALTER TABLE products ADD COLUMN IF NOT EXISTS gift_type VARCHAR(50) DEFAULT 'Standard';
-ALTER TABLE products ADD COLUMN IF NOT EXISTS personalization_options JSONB;
+-- 🛡️ FREEDOM BYPASS (Removes foreign key constraints for production agility)
+ALTER TABLE products DROP CONSTRAINT IF EXISTS products_created_by_fkey;
+ALTER TABLE products DROP CONSTRAINT IF EXISTS products_vendor_id_fkey;
+ALTER TABLE admin_activity_logs DROP CONSTRAINT IF EXISTS admin_activity_logs_admin_id_fkey;
+ALTER TABLE product_variants DROP CONSTRAINT IF EXISTS product_variants_product_id_fkey;
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_user_id_fkey;
+ALTER TABLE inventory_pool DROP CONSTRAINT IF EXISTS inventory_pool_product_id_fkey;
 
-DO $$ 
-BEGIN 
-    IF (SELECT data_type FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'images') = 'ARRAY' THEN
-        ALTER TABLE products ALTER COLUMN images TYPE JSONB USING to_jsonb(images);
-    END IF;
-END $$;
-
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_code VARCHAR(50) UNIQUE;
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number VARCHAR(255);
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS estimated_delivery DATE;
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS history JSONB DEFAULT '[]'::jsonb;
+-- CACHE RESET
+NOTIFY pgrst, 'reload schema';

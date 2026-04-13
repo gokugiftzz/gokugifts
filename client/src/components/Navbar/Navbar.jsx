@@ -8,12 +8,12 @@ import { getProducts } from '../../utils/api';
 import styles from './Navbar.module.css';
 
 const NAV_CATEGORIES = [
-  { name: 'Personalized', param: { customizable: 'true' }, link: '/products?customizable=true' },
-  { name: 'Birthday',     param: { occasion: 'birthday' }, link: '/products?occasion=birthday' },
-  { name: 'Anniversary',  param: { occasion: 'anniversary' }, link: '/products?occasion=anniversary' },
-  { name: 'Jewelry',      param: { category: 'Jewelry' }, link: '/products?category=Jewelry' },
-  { name: 'Hampers',      param: { category: 'Hampers' }, link: '/products?category=Hampers' },
-  { name: 'Art',          param: { category: 'Art' }, link: '/products?category=Art' },
+  { name: 'Frames',              param: { category: 'Frames' },              link: '/products?category=Frames' },
+  { name: 'Polaroids',           param: { category: 'Polaroids' },           link: '/products?category=Polaroids' },
+  { name: 'Hair Accessories',    param: { category: 'Hair Accessories' },    link: '/products?category=Hair+Accessories' },
+  { name: 'Hampers',             param: { category: 'Hampers' },             link: '/products?category=Hampers' },
+  { name: 'Toys',                param: { category: 'Toys' },                link: '/products?category=Toys' },
+  { name: 'Anti-Tarnish Jewels', param: { category: 'Anti-Tarnish Jewels' }, link: '/products?category=Anti-Tarnish+Jewels' },
 ];
 
 /* Individual category dropdown */

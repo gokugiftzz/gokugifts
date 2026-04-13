@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FiShoppingCart, FiHeart, FiUser, FiSearch, FiMenu, FiX, FiBell } from 'react-icons/fi';
-import { MdAutoAwesome } from 'react-icons/md';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
@@ -54,13 +53,13 @@ const Navbar = () => {
 
         {/* Desktop Nav Links */}
         <div className={styles.navLinks}>
-          <Link to="/products" className={styles.navLink}>Shop</Link>
-          <Link to="/products?occasion=birthday" className={styles.navLink}>Birthday</Link>
-          <Link to="/products?occasion=anniversary" className={styles.navLink}>Anniversary</Link>
-          <Link to="/products?customizable=true" className={styles.navLink}>Customize</Link>
-          <Link to="/ai-finder" className={`${styles.navLink} ${styles.aiLink}`}>
-            <MdAutoAwesome /> AI Finder
-          </Link>
+          <Link to="/products" className={styles.navLink}>All</Link>
+          <Link to="/products?category=Frames" className={styles.navLink}>Frames</Link>
+          <Link to="/products?category=Polaroids" className={styles.navLink}>Polaroids</Link>
+          <Link to="/products?category=Hair+Accessories" className={styles.navLink}>Hair Accessories</Link>
+          <Link to="/products?category=Hampers" className={styles.navLink}>Hampers</Link>
+          <Link to="/products?category=Toys" className={styles.navLink}>Toys</Link>
+          <Link to="/products?category=Anti-Tarnish+Jewels" className={styles.navLink}>Anti-Tarnish Jewels</Link>
         </div>
 
         {/* Actions */}
@@ -143,11 +142,13 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className={styles.mobileMenu}>
-          <Link to="/products" className={styles.mobileLink}>Shop All</Link>
-          <Link to="/products?occasion=birthday" className={styles.mobileLink}>Birthday Gifts</Link>
-          <Link to="/products?occasion=anniversary" className={styles.mobileLink}>Anniversary Gifts</Link>
-          <Link to="/products?customizable=true" className={styles.mobileLink}>Customize</Link>
-          <Link to="/ai-finder" className={styles.mobileLink}>🤖 AI Gift Finder</Link>
+          <Link to="/products" className={styles.mobileLink}>🛍️ All Products</Link>
+          <Link to="/products?category=Frames" className={styles.mobileLink}>🖼️ Frames</Link>
+          <Link to="/products?category=Polaroids" className={styles.mobileLink}>📸 Polaroids</Link>
+          <Link to="/products?category=Hair+Accessories" className={styles.mobileLink}>💇 Hair Accessories</Link>
+          <Link to="/products?category=Hampers" className={styles.mobileLink}>🎁 Hampers</Link>
+          <Link to="/products?category=Toys" className={styles.mobileLink}>🧸 Toys</Link>
+          <Link to="/products?category=Anti-Tarnish+Jewels" className={styles.mobileLink}>💍 Anti-Tarnish Jewels</Link>
           {user ? (
             <>
               <Link to="/profile" className={styles.mobileLink}>My Profile</Link>
