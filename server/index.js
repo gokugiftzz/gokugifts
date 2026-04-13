@@ -54,6 +54,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'GokuGiftz API is running 🎁', timestamp: new Date() });
 });
 
+app.get('/', (req, res) => {
+  res.send('GokuGiftz API Server is successfully running. 🚀');
+});
+
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
