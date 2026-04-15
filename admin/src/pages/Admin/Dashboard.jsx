@@ -70,36 +70,38 @@ const Dashboard = () => {
             <h3>Recent Orders</h3>
             <button className={styles.viewAll}>View All</button>
           </div>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats?.recentOrders?.length > 0 ? stats.recentOrders.map(order => (
-                <tr key={order.id}>
-                  <td><strong>#{order.id.substring(0, 8)}</strong></td>
-                  <td>{order.user?.name || 'Guest'}</td>
-                  <td>{new Date(order.created_at).toLocaleDateString()}</td>
-                  <td>
-                    <span className={`${styles.status} ${styles[order.status?.toLowerCase()]}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td>₹{order.total}</td>
-                </tr>
-              )) : (
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>No orders found yet</td>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Total</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {stats?.recentOrders?.length > 0 ? stats.recentOrders.map(order => (
+                  <tr key={order.id}>
+                    <td><strong>#{order.id.substring(0, 8)}</strong></td>
+                    <td>{order.user?.name || 'Guest'}</td>
+                    <td>{new Date(order.created_at).toLocaleDateString()}</td>
+                    <td>
+                      <span className={`${styles.status} ${styles[order.status?.toLowerCase()]}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td>₹{order.total}</td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>No orders found yet</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className={styles.miniCard}>

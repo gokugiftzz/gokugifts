@@ -16,6 +16,12 @@
   }
 }
 
+@media (max-width: 600px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .statCard {
   background: #fff;
   border-radius: 12px;
@@ -106,8 +112,15 @@
   cursor: pointer;
 }
 
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
 }
 

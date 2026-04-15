@@ -63,7 +63,7 @@ const Checkout = () => {
 
       message += `👤 *Customer Details*\n`;
       message += `━━━━━━━━━━━━━━━━━━\n`;
-      message += `Name: ${user?.name || 'Guest'}\n`;
+      message += `Name: ${user.name}\n`;
       message += `Phone: ${address.phone}\n\n`;
 
       message += `📍 *Delivery Address*\n`;
@@ -110,6 +110,22 @@ const Checkout = () => {
       setLoading(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className={styles.emptyContainer}>
+        <div className="empty-state">
+          <FiAlertCircle size={48} color="var(--primary)" />
+          <h3>Account Required</h3>
+          <p>Please login or create an account to secure your order and continue checkout.</p>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+            <Link to="/login" className="btn btn-primary">Login to Continue</Link>
+            <Link to="/register" className="btn" style={{ background: '#f1f5f9', color: '#0f172a' }}>Sign Up here</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (cart.length === 0) {
     return (
