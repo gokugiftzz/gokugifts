@@ -13,14 +13,15 @@
 /* Image Section */
 .mainImage {
   position: relative; border-radius: 32px; overflow: hidden;
-  aspect-ratio: 1; background: #f9fafb; border: 1px solid #eee;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+  aspect-ratio: 1; background: var(--bg-primary); border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
 }
 .mainImage img { width: 100%; height: 100%; object-fit: cover; }
 .discountLabel {
   position: absolute; top: 20px; left: 20px;
   padding: 6px 16px; border-radius: 40px;
-  background: var(--primary); color: #fff; font-size: 0.85rem; font-weight: 800;
+  background: var(--gradient-primary); color: #fff; font-size: 0.85rem; font-weight: 800;
+  box-shadow: var(--shadow-sm);
 }
 .deliveryLabel {
   position: absolute; top: 20px; right: 20px;
@@ -58,7 +59,7 @@
 
 /* Customization */
 .customSection {
-  background: #fdf2f8; border: 1px solid #fce7f3;
+  background: var(--bg-secondary); border: 1px solid var(--border-medium);
   border-radius: 20px; padding: 24px; margin-bottom: 24px;
 }
 
@@ -118,7 +119,8 @@
 
 /* CTA Buttons */
 .ctaButtons { display: flex; gap: 12px; margin-bottom: 32px; }
-.addBtn { flex: 1; padding: 18px 32px !important; font-size: 1.1rem !important; font-weight: 900 !important; box-shadow: 0 10px 30px rgba(230, 57, 70, 0.3) !important; }
+.addBtn { flex: 1; padding: 18px 32px !important; font-size: 1.1rem !important; font-weight: 900 !important; box-shadow: var(--shadow-glow) !important; background: var(--gradient-primary) !important; border: none !important; color: #fff !important; }
+.addBtn:hover { background: var(--gradient-btn-hover) !important; transform: translateY(-2px); }
 .wishBtn {
   width: 56px; height: 56px; border-radius: 16px;
   background: #f9fafb; border: 1px solid #eee;
@@ -153,7 +155,7 @@
   border-bottom: 3px solid transparent; margin-bottom: -1px;
 }
 .tabBtn:hover { color: #111827; }
-.tabActive { color: var(--primary) !important; border-bottom-color: var(--primary) !important; background: #fff5f5; }
+.tabActive { color: var(--primary) !important; border-bottom-color: var(--primary) !important; background: var(--bg-secondary); }
 
 
 .description { color: #4b5563; line-height: 1.85; font-size: 1.05rem; font-weight: 500; }

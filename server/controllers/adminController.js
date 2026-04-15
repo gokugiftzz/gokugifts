@@ -93,6 +93,37 @@ exports.updateUserRole = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// @desc    Delete a user
+// @route   DELETE /api/admin/users/:id
+exports.deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    // Delete related to avoid hard FK crash
+    await supabase.from('wishlist').delete().eq('user_id', userId);
+    await supabase.from('reviews').delete().eq('user_id', userId);
+    await supabase.from('orders').delete().eq('user_id', userId);
+    
+    const { error } = await supabase.from('users').delete().eq('id', userId);
+    if (error) throw error;
+    res.json({ success: true, message: 'User deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Delete an order
+// @route   DELETE /api/admin/orders/:id
+exports.deleteOrder = async (req, res) => {
+  try {
+    const { error } = await supabase.from('orders').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ success: true, message: 'Order deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // @desc    Delete all products (admin)
 // @route   DELETE /api/admin/products/all
 exports.deleteAllProducts = async (req, res) => {

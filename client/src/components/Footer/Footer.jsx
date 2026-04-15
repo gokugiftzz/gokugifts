@@ -62,30 +62,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Payment & Badges */}
-        <div className={styles.payments}>
-          <p className={styles.payLabel}>Secure Payments:</p>
-          <div className={styles.payIcons}>
-            {['Razorpay', 'UPI', 'Visa', 'Mastercard', 'PhonePe'].map(p => (
-              <span key={p} className={styles.payBadge}>{p}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* Trust badges */}
-        <div className={styles.trustBadges}>
-          {[
-            { icon: '🔒', text: 'Secure Checkout' },
-            { icon: '🚚', text: 'Free Shipping ₹999+' },
-            { icon: '🎁', text: 'Gift Wrapping' },
-            { icon: '↩️', text: '7-Day Returns' }
-          ].map(badge => (
-            <div key={badge.icon} className={styles.badge}>
-              <span>{badge.icon}</span>
-              <span>{badge.text}</span>
-            </div>
-          ))}
-        </div>
 
         {/* Bottom */}
         <div className={styles.bottom}>

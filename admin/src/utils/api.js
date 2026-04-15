@@ -78,9 +78,7 @@ export const uploadImage = (formData) => API.post('/upload', formData, {
 export const createRazorpayOrder = (data) => API.post('/payment/razorpay/create', data);
 export const verifyRazorpayPayment = (data) => API.post('/payment/razorpay/verify', data);
 
-// AI
-export const getAIRecommendations = (data) => API.post('/ai/recommend', data);
-export const getAIChat = (data) => API.post('/ai/chat', data);
+// AI endpoints removed by request
 
 // Reviews
 export const getReviews = (productId) => API.get(`/reviews/${productId}`);
@@ -90,6 +88,8 @@ export const addReview = (productId, data) => API.post(`/reviews/${productId}`, 
 export const getAdminStats = () => API.get('/admin/analytics');
 export const getAllUsers = () => API.get('/admin/users');
 export const updateUserRole = (id, data) => API.put(`/admin/users/${id}/role`, data);
+export const deleteUser = (id) => API.delete(`/admin/users/${id}`);
+export const deleteOrder = (id) => API.delete(`/admin/orders/${id}`);
 export const deleteAllProducts = () => API.delete('/admin/products/all');
 
 export default API;

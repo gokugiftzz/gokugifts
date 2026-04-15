@@ -48,18 +48,6 @@
 }
 .contact:hover { color: var(--primary); }
 
-/* Payments */
-.payments {
-  border-top: 1px solid #eee; padding: 24px 0;
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-}
-.payLabel { font-size: 0.85rem; color: #6b7280; font-weight: 700; }
-.payIcons { display: flex; gap: 10px; }
-.payBadge {
-  padding: 6px 14px; border-radius: 8px;
-  background: #fff; border: 1px solid #eee;
-  font-size: 0.8rem; color: #4b5563; font-weight: 700;
-}
 
 /* Bottom */
 .bottom {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { FiShoppingBag, FiEye, FiClock, FiCheckCircle, FiTruck, FiXCircle, FiTrendingUp, FiSearch, FiGift, FiX, FiInfo } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import styles from './AdminOrders.module.css';
-import { getAllOrders, updateOrderStatus } from '../../utils/api';
+import { getAllOrders, updateOrderStatus, deleteOrder } from '../../utils/api';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -52,6 +52,18 @@ const AdminOrders = () => {
       toast.error('Failed to update status');
     } finally {
       setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleOrderDelete = async (orderId) => {
+    if (window.confirm('🚨 WARNING: Are you sure you want to delete this order? This action cannot be undone.')) {
+      try {
+        await deleteOrder(orderId);
+        toast.success('Order deleted successfully');
+        setOrders(orders.filter(o => o.id !== orderId));
+      } catch (err) {
+        toast.error('Failed to delete order');
+      }
     }
   };
 
@@ -196,12 +208,20 @@ const AdminOrders = () => {
                 </td>
                 <td>{new Date(order.created_at).toLocaleDateString()}</td>
                 <td>
-                  <button 
-                    className={styles.viewButton}
-                    onClick={() => setSelectedOrder(order)}
-                  >
-                    <FiEye /> View Details
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button 
+                      className={styles.viewButton}
+                      onClick={() => setSelectedOrder(order)}
+                    >
+                      <FiEye /> View
+                    </button>
+                    <button 
+                      onClick={() => handleOrderDelete(order.id)}
+                      style={{ background: '#fef2f2', color: '#e63946', border: '1px solid #fecaca', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             )) : (

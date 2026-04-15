@@ -53,11 +53,18 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  background: var(--gradient-primary) !important;
+  color: #fff !important;
+  border: none !important;
+}
+.addBtn:hover {
+  background: var(--gradient-btn-hover) !important;
+  box-shadow: var(--shadow-glow) !important;
 }
 
 .removeBtn {
-  background: rgba(255, 107, 107, 0.1);
-  border: 1px solid rgba(255, 107, 107, 0.2);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
   color: var(--primary);
   padding: 12px 18px;
   border-radius: var(--radius-md);

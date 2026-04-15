@@ -20,7 +20,11 @@
 .filterSelect { padding: 10px 15px; border-radius: 8px; border: 1px solid #d1d5db; outline: none; background-color: white; font-size: 0.9rem; cursor: pointer; }
 
 /* Table */
-.tableCard { background: #fff; border: 1px solid #eee; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+.tableCard { 
+  background: #fff; border: 1px solid #eee; border-radius: 16px; 
+  overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+  width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
 .table { width: 100%; border-collapse: collapse; text-align: left; }
 .table th { background: #f9fafb; padding: 16px; border-bottom: 2px solid #f3f4f6; font-size: 0.85rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
 .table td { padding: 16px; border-bottom: 1px solid #f3f4f6; font-size: 0.9rem; color: #374151; vertical-align: middle; }
@@ -111,3 +115,11 @@
 .modalInput:focus { border-color: #3b82f6; }
 .noHistory { text-align: center; color: #94a3b8; font-style: italic; padding: 20px; }
 
+@media (max-width: 768px) {
+  .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .header h1 { font-size: 1.5rem; }
+  .filtersBar { flex-direction: column; }
+  .searchInput { width: 100%; }
+  .table th, .table td { padding: 12px 10px; font-size: 0.8rem; }
+  .customerCell { min-width: 120px; }
+}

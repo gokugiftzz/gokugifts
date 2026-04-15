@@ -64,9 +64,7 @@ export const uploadImage = (formData) => API.post('/upload', formData, {
 export const createRazorpayOrder = (data) => API.post('/payment/razorpay/create', data);
 export const verifyRazorpayPayment = (data) => API.post('/payment/razorpay/verify', data);
 
-// AI
-export const getAIRecommendations = (data) => API.post('/ai/recommend', data);
-export const getAIChat = (data) => API.post('/ai/chat', data);
+// AI endpoints removed
 
 // Reviews
 export const getReviews = (productId) => API.get(`/reviews/${productId}`);

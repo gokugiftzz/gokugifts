@@ -154,7 +154,7 @@ const Cart = () => {
               Proceed to Checkout <FiArrowRight />
             </button>
 
-            <div className={styles.secureNote}>🔒 Secure & Encrypted Checkout</div>
+
 
             <Link to="/products" className={styles.continueLink}>
               <FiShoppingBag /> Continue Shopping

@@ -236,7 +236,7 @@ const Checkout = () => {
                       </>
                     )}
                   </button>
-                  <p className={styles.secureNote}>You will be redirected to WhatsApp to confirm your order.</p>
+
                 </div>
               )}
             </form>
@@ -271,16 +271,7 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
-            <div className={styles.trustBanner}>
-              <div className={styles.trustItem}>
-                <FiCheckCircle />
-                <span>100% Quality Guaranteed</span>
-              </div>
-              <div className={styles.trustItem}>
-                <FiTruck />
-                <span>Fast & Safe Delivery</span>
-              </div>
-            </div>
+
           </aside>
         </div>
       </div>

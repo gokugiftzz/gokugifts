@@ -1,18 +1,19 @@
 .card {
-  background: #fff;
+  background: var(--bg-primary);
   border-radius: 20px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-light);
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
+  box-shadow: var(--shadow-sm);
 }
 
 .card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-lg);
   border-color: var(--primary);
 }
 
@@ -76,12 +77,13 @@
 }
 
 .discountBadge {
-  background: var(--primary);
+  background: var(--gradient-primary);
   color: #fff;
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 4px 12px;
+  border-radius: 30px;
   font-size: 0.75rem;
   font-weight: 800;
+  box-shadow: 0 4px 10px rgba(255, 154, 158, 0.3);
 }
 
 .deliveryBadge {
@@ -154,12 +156,12 @@
 }
 
 .category {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
 }
 
 .name {
@@ -240,21 +242,23 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--gradient-primary);
+  color: #fff;
   border: none;
-  padding: 10px;
+  padding: 12px;
   border-radius: 12px;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
+  box-shadow: var(--shadow-sm);
 }
 
 .addBtn:hover {
-  background: var(--primary);
-  color: #fff;
+  background: var(--gradient-btn-hover);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-glow);
 }
 
 .shareBtn {

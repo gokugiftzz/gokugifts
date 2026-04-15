@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiStar, FiShoppingCart, FiHeart, FiShare2, FiZap, FiPackage, FiEdit3, FiCheck, FiPlus, FiMinus } from 'react-icons/fi';
+import { FiStar, FiShoppingCart, FiHeart, FiShare2, FiPackage, FiEdit3, FiCheck, FiPlus, FiMinus } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { getProduct, getReviews } from '../utils/api';
@@ -248,12 +248,7 @@ const ProductDetail = () => {
               </button>
             </div>
 
-            {/* Trust Signals */}
-            <div className={styles.trustRow}>
-              <span>🔒 Secure checkout</span>
-              <span>🚚 Free delivery ₹999+</span>
-              <span>↩️ Easy returns</span>
-            </div>
+
           </div>
         </div>
 

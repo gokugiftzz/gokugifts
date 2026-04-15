@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiUsers, FiMail, FiPhone, FiCalendar, FiShield, FiMoreVertical } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import styles from './AdminUsers.module.css';
-import { getAllUsers, updateUserRole } from '../../utils/api';
+import { getAllUsers, updateUserRole, deleteUser } from '../../utils/api';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -32,6 +32,18 @@ const AdminUsers = () => {
         fetchUsers();
       } catch (err) {
         toast.error('Failed to update role');
+      }
+    }
+  };
+
+  const handleUserDelete = async (userId) => {
+    if (window.confirm('🚨 WARNING: Are you sure you want to delete this user? This action cannot be undone.')) {
+      try {
+        await deleteUser(userId);
+        toast.success('User deleted successfully');
+        setUsers(users.filter(u => u.id !== userId));
+      } catch (err) {
+        toast.error('Failed to delete user');
       }
     }
   };
@@ -93,15 +105,23 @@ const AdminUsers = () => {
                   <span className={styles.activeBadge}>Active</span>
                 </td>
                 <td>
-                  <select 
-                    className={styles.roleSelect}
-                    value={user.role} 
-                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                  >
-                    <option value="user">Switch to User</option>
-                    <option value="vendor">Switch to Vendor</option>
-                    <option value="admin">Promote to Admin</option>
-                  </select>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <select 
+                      className={styles.roleSelect}
+                      value={user.role} 
+                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                    >
+                      <option value="user">Switch to User</option>
+                      <option value="vendor">Switch to Vendor</option>
+                      <option value="admin">Promote to Admin</option>
+                    </select>
+                    <button 
+                      onClick={() => handleUserDelete(user.id)}
+                      style={{ background: '#fef2f2', color: '#e63946', border: '1px solid #fecaca', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             )) : (

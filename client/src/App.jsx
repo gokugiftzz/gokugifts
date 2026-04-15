@@ -1,9 +1,9 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import LoadingSpinner from './components/UI/LoadingSpinner';
-import AIChatbot from './components/AIChatbot/AIChatbot';
+
 import { useAuth } from './context/AuthContext';
 
 // Lazy-load pages
@@ -35,6 +35,33 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      // Multiple hearts per click for more 'wow'
+      for (let i = 0; i < 3; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'floating-heart-click';
+        heart.innerHTML = '❤';
+        
+        const offsetX = (Math.random() - 0.5) * 40;
+        const offsetY = (Math.random() - 0.5) * 40;
+        
+        heart.style.left = `${e.clientX + offsetX}px`;
+        heart.style.top = `${e.clientY + offsetY}px`;
+        heart.style.animationDelay = `${i * 0.1}s`;
+        
+        document.body.appendChild(heart);
+        
+        setTimeout(() => {
+          heart.remove();
+        }, 1000 + (i * 100));
+      }
+    };
+
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, []);
+
   return (
     <div className="app">
       <Navbar />
@@ -65,7 +92,6 @@ function App() {
         </Suspense>
       </main>
       <Footer />
-      <AIChatbot />
     </div>
   );
 }

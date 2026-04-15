@@ -31,12 +31,6 @@ const AdminLayout = () => {
           <NavLink to="/inventory" className={({ isActive }) => isActive ? styles.active : styles.link}>
             <FiPackage /> Inventory
           </NavLink>
-          <NavLink to="/analytics" className={({ isActive }) => isActive ? styles.active : styles.link}>
-            <FiBarChart2 /> Analytics
-          </NavLink>
-          <NavLink to="/settings" className={({ isActive }) => isActive ? styles.active : styles.link}>
-            <FiSettings /> Settings
-          </NavLink>
         </nav>
 
         <div className={styles.sidebarFooter}>

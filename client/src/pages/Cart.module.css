@@ -2,7 +2,7 @@
 .container { max-width: 1280px; margin: 0 auto; padding: 24px 16px 80px; }
 .header { display: flex; align-items: center; gap: 16px; margin-bottom: 48px; }
 .header h1 { font-size: 2rem; font-weight: 900; color: #111827; font-family: 'Playfair Display', serif; }
-.count { background: #fee2e2; border: 1px solid #fecaca; color: var(--primary); padding: 6px 16px; border-radius: 40px; font-size: 0.9rem; font-weight: 800; }
+.count { background: var(--bg-secondary); border: 1px solid var(--border-medium); color: var(--primary); padding: 6px 16px; border-radius: 40px; font-size: 0.9rem; font-weight: 800; }
 
 .layout { display: grid; grid-template-columns: 1fr 400px; gap: 48px; align-items: start; }
 @media (max-width: 1200px) { .layout { grid-template-columns: 1fr; gap: 32px; } }
@@ -11,10 +11,11 @@
 .items { display: flex; flex-direction: column; gap: 20px; }
 .item {
   display: flex; gap: 24px; align-items: center;
-  background: #fff; border: 1px solid #eee;
-  border-radius: 24px; padding: 24px; transition: all 0.2s;
+  background: var(--bg-primary); border: 1px solid var(--border-light);
+  border-radius: 24px; padding: 24px; transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
 }
-.item:hover { border-color: var(--primary); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+.item:hover { border-color: var(--primary); box-shadow: var(--shadow-md); transform: scale(1.01); }
 @media (max-width: 600px) { 
   .item { gap: 16px; padding: 16px; align-items: flex-start; flex-wrap: wrap; }
   .itemImage { width: 80px; height: 80px; border-radius: 12px; }
@@ -41,9 +42,9 @@
 
 /* Summary */
 .summary {
-  background: #fff; border: 1px solid #eee;
+  background: var(--bg-primary); border: 1px solid var(--border-light);
   border-radius: 32px; padding: 32px; position: sticky; top: 100px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-md);
 }
 @media (max-width: 1200px) {
   .summary { position: static; padding: 24px; }
@@ -62,10 +63,10 @@
   font-size: 0.95rem; font-family: inherit; outline: none; font-weight: 600;
 }
 .couponBtn {
-  padding: 14px 20px; background: var(--primary); border: none;
+  padding: 14px 20px; background: var(--gradient-primary); border: none;
   color: #fff; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
 }
-.couponBtn:hover { background: var(--primary-dark); }
+.couponBtn:hover { background: var(--gradient-btn-hover); box-shadow: var(--shadow-glow); }
 .couponApplied { font-size: 0.9rem; color: var(--accent); margin-top: 10px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 
 /* Breakdown */

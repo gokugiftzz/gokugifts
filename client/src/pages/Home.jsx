@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiArrowRight, FiStar, FiZap, FiGift, FiHeart, FiShield } from 'react-icons/fi';
-import { MdAutoAwesome } from 'react-icons/md';
 import ProductCard from '../components/ProductCard/ProductCard';
 import { getFeatured } from '../utils/api';
 import { OCCASIONS } from '../utils/mockData';
@@ -25,13 +24,12 @@ const FEATURES = [
 ];
 
 const CATEGORIES_DATA = [
-  { name: 'Personalized', image: 'https://plus.unsplash.com/premium_photo-1726729246634-7c39c462cbaa?q=80&w=2041&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: '#e63946', link: '/products?customizable=true' },
-  { name: 'Birthday', image: 'https://media.istockphoto.com/id/2162398389/photo/birthday-cake-and-decoration.jpg?s=1024x1024&w=is&k=20&c=BNNw5YF6Nkk7qVAfQ6Fy7O1TIDOVd-kuADSLWJbvg_c=', color: '#ffd166', link: '/products?occasion=birthday' },
-  { name: 'Anniversary', image: 'https://images.unsplash.com/photo-1525328302834-764f32276842?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: '#ff6b6b', link: '/products?occasion=anniversary' },
-  { name: 'Jewelry', image: 'https://plus.unsplash.com/premium_photo-1681276169450-4504a2442173?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: '#ff9f43', link: '/products?category=Jewelry' },
-  { name: 'Hampers', image: 'https://plus.unsplash.com/premium_photo-1663127554127-1f2fd7682180?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: '#ff6b9d', link: '/products?category=Hampers' },
-  { name: 'Art', image: 'https://images.unsplash.com/photo-1758521232733-85bfe4519eff?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: '#48dbfb', link: '/products?category=Art' }
-   
+  { name: 'Personalized', image: 'https://plus.unsplash.com/premium_photo-1726729246634-7c39c462cbaa?q=80&w=2041&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', link: '/products?customizable=true' },
+  { name: 'Birthday', image: 'https://media.istockphoto.com/id/2162398389/photo/birthday-cake-and-decoration.jpg?s=1024x1024&w=is&k=20&c=BNNw5YF6Nkk7qVAfQ6Fy7O1TIDOVd-kuADSLWJbvg_c=', link: '/products?occasion=birthday' },
+  { name: 'Anniversary', image: 'https://images.unsplash.com/photo-1525328302834-764f32276842?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', link: '/products?occasion=anniversary' },
+  { name: 'Jewelry', image: 'https://plus.unsplash.com/premium_photo-1681276169450-4504a2442173?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', link: '/products?category=Jewelry' },
+  { name: 'Hampers', image: 'https://plus.unsplash.com/premium_photo-1663127554127-1f2fd7682180?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', link: '/products?category=Hampers' },
+  { name: 'Art', image: 'https://images.unsplash.com/photo-1758521232733-85bfe4519eff?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', link: '/products?category=Art' }
 ];
 
 const TESTIMONIALS = [];
@@ -65,7 +63,7 @@ const Home = () => {
         </div>
         <div className={styles.heroContent}>
           <div className={styles.heroBadge}>
-            <span></span>Giftzz Are Undefined Tool To Fix Everything
+            Gifts That Create Unforgettable Memories
           </div>
           <h1 className={styles.heroHeadline}>
             {slide.headline} <br/>

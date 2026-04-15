@@ -1,6 +1,6 @@
-.page { padding-top: 100px; background: #fff; min-height: 100vh; }
+.page { padding-top: 100px; background: var(--bg-primary); min-height: 100vh; }
 
-.topSection { border-bottom: 1px solid #f1f5f9; padding: 40px 0; background: #fcfcfc; }
+.topSection { border-bottom: 1px solid var(--border-light); padding: 40px 0; background: var(--bg-secondary); }
 
 .header { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
 .headerLeft { flex: 1; }
@@ -35,7 +35,7 @@
 .filterTags { display: flex; flex-wrap: wrap; gap: 8px; }
 .filterTag { background: #f3f4f6; border: 1px solid #eee; padding: 8px 16px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #4b5563; cursor: pointer; transition: all 0.2s; }
 .filterTag:hover { background: #e5e7eb; }
-.tagActive { background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important; }
+.tagActive { background: var(--gradient-primary) !important; color: #fff !important; border-color: var(--primary) !important; }
 
 .checkLabel { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #374151; transition: color 0.2s; }
 .checkLabel:hover { color: var(--primary); }
@@ -46,7 +46,7 @@
 
 .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding-top: 40px; border-top: 1px solid #f1f5f9; }
 .pageBtn { min-width: 44px; height: 44px; padding: 0 16px !important; border-radius: 12px !important; font-size: 0.9rem !important; }
-.pageBtnActive { background: var(--primary) !important; color: #fff !important; }
+.pageBtnActive { background: var(--gradient-primary) !important; color: #fff !important; }
 
 /* Skeletons */
 .skeletonGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 32px; }

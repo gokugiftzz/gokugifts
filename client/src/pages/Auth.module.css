@@ -1,13 +1,13 @@
 .page {
   padding-top: 80px; min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at top, rgba(230, 57, 70, 0.05) 0%, transparent 60%);
+  background: radial-gradient(ellipse at top, rgba(255, 154, 158, 0.15) 0%, var(--bg-primary) 60%);
 }
 .container { width: 100%; max-width: 480px; padding: 20px; }
 .card {
-  background: #fff; border: 1px solid #eee;
+  background: var(--bg-primary); border: 1px solid var(--border-light);
   border-radius: 28px; padding: 48px 40px;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-xl);
   animation: fadeInUp 0.5s ease;
 }
 @media (max-width: 480px) { .card { padding: 32px 24px; border-radius: 20px; } }
@@ -31,7 +31,17 @@
 .forgotLink { font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 600; }
 .forgotLink:hover { text-decoration: underline; }
 
-.submitBtn { width: 100%; padding: 14px !important; font-size: 1rem !important; margin-top: 8px; font-weight: 900; }
+.submitBtn { 
+  width: 100%; padding: 14px !important; font-size: 1rem !important; margin-top: 8px; font-weight: 900;
+  background: var(--gradient-primary) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: var(--shadow-glow);
+}
+.submitBtn:hover {
+  background: var(--gradient-btn-hover) !important;
+  transform: translateY(-2px);
+}
 
 .divider {
   text-align: center; position: relative; margin: 24px 0; color: #9ca3af; font-size: 0.85rem; font-weight: 500;
