@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiTrash2, FiEdit2, FiEye, FiDownload, FiSearch, FiAlertTriangle, FiX, FiImage, FiSettings } from 'react-icons/fi';
 import toast from 'react-hot-toast';
-import axios from 'axios';
 import styles from './AdminProducts.module.css';
-import { getProducts, deleteAllProducts, deleteProduct, createProduct, updateProduct } from '../../utils/api';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+import { getProducts, deleteAllProducts, deleteProduct, createProduct, updateProduct, getInventory } from '../../utils/api';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -17,6 +14,11 @@ const AdminProducts = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Deletion State
+  const [deleteId, setDeleteId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showEraseConfirm, setShowEraseConfirm] = useState(false);
   
   const initialProductState = {
     product_code: '',
@@ -55,9 +57,7 @@ const AdminProducts = () => {
 
   const fetchInventory = async () => {
     try {
-      const { data } = await axios.get(`${API_URL}/inventory`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
+      const { data } = await getInventory();
       setInventoryPool(data.inventory.filter(i => !i.is_used || i.product_code === newProduct.product_code));
     } catch (error) {}
   };
@@ -93,27 +93,37 @@ const AdminProducts = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await deleteProduct(id);
-        toast.success('Product deleted successfully');
-        fetchProducts();
-      } catch (err) {
-        toast.error('Delete failed');
-      }
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      setIsDeleting(true);
+      await deleteProduct(deleteId);
+      toast.success('Product deleted successfully');
+      setDeleteId(null);
+      fetchProducts();
+    } catch (err) {
+      console.error('Delete Product Failed:', err.response?.data || err.message);
+      toast.error(`Delete failed: ${err.response?.data?.message || err.message}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const handleEraseAll = async () => {
-    if (window.confirm('⚠️ CRITICAL: Are you sure you want to erase ALL products? This cannot be undone!')) {
-      try {
-        await deleteAllProducts();
-        toast.success('All products have been erased.');
-        setProducts([]);
-      } catch (err) {
-        toast.error('Erase failed: ' + (err.response?.data?.message || err.message));
-      }
+  const handleEraseAll = () => {
+    setShowEraseConfirm(true);
+  };
+
+  const confirmEraseAll = async () => {
+    try {
+      setIsSubmitting(true);
+      await deleteAllProducts();
+      toast.success('Inventory wiped clean! 🧹');
+      setShowEraseConfirm(false);
+      fetchProducts();
+    } catch (err) {
+      toast.error('Factory reset failed: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -272,8 +282,44 @@ const AdminProducts = () => {
     return typeof firstImg === 'object' ? firstImg.url : firstImg;
   };
 
+  if (loading) return <div className={styles.loading}>Updating Catalog...</div>;
+
   return (
     <div className={styles.container}>
+      {/* Product Delete Confirmation Modal */}
+      {deleteId && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.confirmModal}>
+            <div className={styles.confirmIcon}><FiTrash2 /></div>
+            <h3>Delete this Product?</h3>
+            <p>This will remove the product from your store and archive all related metadata. This action cannot be undone.</p>
+            <div className={styles.confirmActions}>
+              <button className="btn btn-ghost" onClick={() => setDeleteId(null)} disabled={isDeleting}>Cancel</button>
+              <button className={styles.deleteBtnFinal} onClick={confirmDelete} disabled={isDeleting}>
+                {isDeleting ? 'Deleting...' : 'Yes, Delete Product'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Erase ALL Confirmation Modal */}
+      {showEraseConfirm && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.confirmModal} style={{ borderColor: 'var(--danger)' }}>
+            <div className={styles.confirmIcon}><FiAlertTriangle style={{ color: 'var(--danger)' }} /></div>
+            <h3 style={{ color: 'var(--danger)' }}>WIPE ENTIRE INVENTORY?</h3>
+            <p><strong>🚨 WARNING:</strong> This will delete <strong>EVERY SINGLE PRODUCT</strong> in your store. This is a factory reset and cannot be reversed.</p>
+            <div className={styles.confirmActions}>
+              <button className="btn btn-ghost" onClick={() => setShowEraseConfirm(false)} disabled={isSubmitting}>Abort</button>
+              <button className={styles.deleteBtnFinal} onClick={confirmEraseAll} disabled={isSubmitting}>
+                {isSubmitting ? 'Wiping...' : 'YES, WIPE ALL'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={styles.header}>
         <div>
           <h1>Product Management</h1>
@@ -327,7 +373,7 @@ const AdminProducts = () => {
                   <div className={styles.rowActions}>
                     <button type="button" className={styles.iconBtn} title="View" onClick={() => window.open(`http://localhost:5173/products/${product.id}`, '_blank')}><FiEye /></button>
                     <button type="button" className={styles.iconBtn} title="Edit" onClick={() => handleEdit(product)}><FiEdit2 /></button>
-                    <button type="button" className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Delete" onClick={() => handleDelete(product.id)}>
+                    <button type="button" className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Delete" onClick={() => setDeleteId(product.id)}>
                       <FiTrash2 />
                     </button>
                   </div>

@@ -1,13 +1,14 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  // Use absolute URL for local dev to bypass any proxy issues, fallback to /api for production
+  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5005/api' : '/api'),
   headers: { 'Content-Type': 'application/json' }
 });
 
 // Attach token to every request
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('gokugiftz_token');
+  const token = localStorage.getItem('gokugiftz_token') || localStorage.getItem('adminToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -91,5 +92,9 @@ export const updateUserRole = (id, data) => API.put(`/admin/users/${id}/role`, d
 export const deleteUser = (id) => API.delete(`/admin/users/${id}`);
 export const deleteOrder = (id) => API.delete(`/admin/orders/${id}`);
 export const deleteAllProducts = () => API.delete('/admin/products/all');
+
+// Inventory
+export const getInventory = () => API.get('/inventory');
+export const bulkImportInventory = (data) => API.post('/inventory/bulk', data);
 
 export default API;

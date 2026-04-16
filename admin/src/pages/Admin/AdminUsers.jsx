@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiUsers, FiMail, FiPhone, FiCalendar, FiShield, FiMoreVertical } from 'react-icons/fi';
+import { FiUsers, FiMail, FiPhone, FiCalendar, FiShield, FiMoreVertical, FiXCircle, FiTrash2 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import styles from './AdminUsers.module.css';
 import { getAllUsers, updateUserRole, deleteUser } from '../../utils/api';
@@ -7,6 +7,9 @@ import { getAllUsers, updateUserRole, deleteUser } from '../../utils/api';
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [deleteId, setDeleteId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -36,15 +39,20 @@ const AdminUsers = () => {
     }
   };
 
-  const handleUserDelete = async (userId) => {
-    if (window.confirm('🚨 WARNING: Are you sure you want to delete this user? This action cannot be undone.')) {
-      try {
-        await deleteUser(userId);
-        toast.success('User deleted successfully');
-        setUsers(users.filter(u => u.id !== userId));
-      } catch (err) {
-        toast.error('Failed to delete user');
-      }
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      setIsDeleting(true);
+      console.log('Executing confirmed delete for User ID:', deleteId);
+      await deleteUser(deleteId);
+      toast.success('User deleted successfully');
+      setUsers(users.filter(u => u.id !== deleteId));
+      setDeleteId(null);
+    } catch (err) {
+      console.error('Delete User Failed:', err.response?.data || err.message);
+      toast.error(`Failed to delete user: ${err.response?.data?.message || err.message}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -52,6 +60,23 @@ const AdminUsers = () => {
 
   return (
     <div className={styles.container}>
+      {/* Confirmation Modal */}
+      {deleteId && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.confirmModal}>
+            <div className={styles.confirmIcon}><FiXCircle /></div>
+            <h3>Are you absolutely sure?</h3>
+            <p>This will permanently delete the user and all their associated data. This action cannot be undone.</p>
+            <div className={styles.confirmActions}>
+              <button className="btn btn-ghost" onClick={() => setDeleteId(null)} disabled={isDeleting}>Cancel</button>
+              <button className={styles.deleteBtnFinal} onClick={confirmDelete} disabled={isDeleting}>
+                {isDeleting ? 'Deleting...' : 'Yes, Delete User'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={styles.header}>
         <div>
           <h1>User Management ({users.length})</h1>
@@ -116,8 +141,8 @@ const AdminUsers = () => {
                       <option value="admin">Promote to Admin</option>
                     </select>
                     <button 
-                      onClick={() => handleUserDelete(user.id)}
-                      style={{ background: '#fef2f2', color: '#e63946', border: '1px solid #fecaca', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                      onClick={() => setDeleteId(user.id)}
+                      className={styles.deleteBtn}
                     >
                       Delete
                     </button>

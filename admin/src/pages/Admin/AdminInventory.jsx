@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FiPackage, FiSearch, FiRefreshCw, FiPlus, FiCheckCircle, FiMinusCircle } from 'react-icons/fi';
-import axios from 'axios';
+import { getInventory, bulkImportInventory } from '../../utils/api';
 import toast from 'react-hot-toast';
-import styles from './AdminUsers.module.css'; // Reuse table styles for consistency
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+import styles from './AdminUsers.module.css';
 
 const AdminInventory = () => {
   const [inventory, setInventory] = useState([]);
@@ -16,9 +14,7 @@ const AdminInventory = () => {
   const fetchInventory = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${API_URL}/inventory`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
+      const { data } = await getInventory();
       setInventory(data.inventory);
     } catch (error) {
       toast.error('Failed to fetch inventory');
@@ -33,9 +29,7 @@ const AdminInventory = () => {
 
   const handleBulkImport = async () => {
     try {
-      await axios.post(`${API_URL}/inventory/bulk`, bulkConfig, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-      });
+      await bulkImportInventory(bulkConfig);
       toast.success('Inventory IDs imported successfully');
       setShowBulkModal(false);
       fetchInventory();

@@ -16,6 +16,9 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
+  const [deleteId, setDeleteId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -55,15 +58,20 @@ const AdminOrders = () => {
     }
   };
 
-  const handleOrderDelete = async (orderId) => {
-    if (window.confirm('🚨 WARNING: Are you sure you want to delete this order? This action cannot be undone.')) {
-      try {
-        await deleteOrder(orderId);
-        toast.success('Order deleted successfully');
-        setOrders(orders.filter(o => o.id !== orderId));
-      } catch (err) {
-        toast.error('Failed to delete order');
-      }
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      setIsDeleting(true);
+      console.log('Executing confirmed delete for Order ID:', deleteId);
+      await deleteOrder(deleteId);
+      toast.success('Order deleted successfully');
+      setOrders(orders.filter(o => o.id !== deleteId));
+      setDeleteId(null);
+    } catch (err) {
+      console.error('Delete Order Failed:', err.response?.data || err.message);
+      toast.error(`Failed to delete order: ${err.response?.data?.message || err.message}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -106,6 +114,23 @@ const AdminOrders = () => {
 
   return (
     <div className={styles.container}>
+      {/* Confirmation Modal */}
+      {deleteId && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.confirmModal}>
+            <div className={styles.confirmIcon}><FiXCircle /></div>
+            <h3>Delete this Order?</h3>
+            <p>This will permanently remove this order record from the system. This action cannot be undone.</p>
+            <div className={styles.confirmActions}>
+              <button className="btn btn-ghost" onClick={() => setDeleteId(null)} disabled={isDeleting}>Cancel</button>
+              <button className={styles.deleteBtnFinal} onClick={confirmDelete} disabled={isDeleting}>
+                {isDeleting ? 'Deleting...' : 'Yes, Delete Order'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={styles.header}>
         <div>
           <h1>Order Management ({orders.length})</h1>
@@ -216,8 +241,8 @@ const AdminOrders = () => {
                       <FiEye /> View
                     </button>
                     <button 
-                      onClick={() => handleOrderDelete(order.id)}
-                      style={{ background: '#fef2f2', color: '#e63946', border: '1px solid #fecaca', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                      onClick={() => setDeleteId(order.id)}
+                      className={styles.deleteBtn}
                     >
                       Delete
                     </button>
