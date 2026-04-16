@@ -323,15 +323,16 @@ button:disabled, .btn:disabled {
 /* Floating Heart Click Effect */
 .floating-heart-click {
   position: fixed;
-  color: #ff9a9e; 
   font-size: 1.8rem;
   pointer-events: none;
   z-index: 10000;
   opacity: 0.8;
   transform: translate(-50%, -50%) scale(1);
   animation: floatHeart 1s ease-out forwards;
-  background: -webkit-linear-gradient(135deg, #ff9a9e, #fb406c);
+  background: linear-gradient(135deg, #ff9a9e, #fb406c);
   -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 10px rgba(255, 154, 158, 0.5));
 }
